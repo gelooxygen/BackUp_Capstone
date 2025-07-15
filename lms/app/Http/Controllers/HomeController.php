@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
 {
@@ -43,5 +44,96 @@ class HomeController extends Controller
     public function studentDashboardIndex()
     {
         return view('dashboard.student_dashboard');
+    }
+
+    /** admin dashboard */
+    public function adminDashboardIndex()
+    {
+        return view('dashboard.admin_dashboard');
+    }
+
+    /** parent dashboard */
+    public function parentDashboardIndex()
+    {
+        return view('dashboard.parent_dashboard');
+    }
+
+    /**
+     * Show the form for editing the authenticated user's profile.
+     */
+    public function editProfile()
+    {
+        $user = auth()->user();
+        $user = \App\Models\User::find($user->id);
+        $student = $user->student;
+        $teacher = $user->teacher;
+        return view('dashboard.edit_profile', compact('user', 'student', 'teacher'));
+    }
+
+    /**
+     * Update the authenticated user's profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $user = \App\Models\User::find($user->id);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ]);
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+        activity()
+            ->causedBy($user)
+            ->performedOn($user)
+            ->withProperties(['attributes' => $request->only(['name', 'email'])])
+            ->log('updated profile');
+        // Role-specific updates (future extension)
+        if ($user->role_name === \App\Models\User::ROLE_STUDENT && $user->student) {
+            // Example: $user->student->admission_id = $request->student_id; (if editable)
+            $user->student->save();
+        }
+        if ($user->role_name === \App\Models\User::ROLE_TEACHER && $user->teacher) {
+            // Example: $user->teacher->teacher_id = $request->teacher_id; (if editable)
+            $user->teacher->save();
+        }
+        return redirect()->route('user/profile/page')->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Update the authenticated user's password.
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+        $user = \App\Models\User::find($user->id);
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+        if (!\Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+        activity()
+            ->causedBy($user)
+            ->performedOn($user)
+            ->log('changed password');
+        return redirect()->route('user/profile/page')->with('success', 'Password updated successfully.');
+    }
+
+    /**
+     * Display the current user's activity logs.
+     */
+    public function activityLog()
+    {
+        $user = auth()->user();
+        $activities = \Spatie\Activitylog\Models\Activity::where('causer_id', $user->id)
+            ->where('causer_type', get_class($user))
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        return view('dashboard.activity_log', compact('activities'));
     }
 }

@@ -1,6 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\Setting;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\AccountsController;
+use Illuminate\Support\Facades\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,10 +75,10 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::get('/home', 'index')->middleware('auth')->name('home');
         Route::get('/dashboard', 'dashboard')->middleware('auth')->name('dashboard');
         Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
-        Route::get('admin/dashboard', 'adminDashboardIndex')->middleware('auth')->name('admin/dashboard');
-        Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware('auth')->name('teacher/dashboard');
-        Route::get('student/dashboard', 'studentDashboardIndex')->middleware('auth')->name('student/dashboard');
-        Route::get('parent/dashboard', 'parentDashboardIndex')->middleware('auth')->name('parent/dashboard');
+        Route::get('admin/dashboard', 'adminDashboardIndex')->middleware(['auth', 'role:Admin'])->name('admin/dashboard');
+        Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware(['auth', 'role:Teacher'])->name('teacher/dashboard');
+        Route::get('student/dashboard', 'studentDashboardIndex')->middleware(['auth', 'role:Student'])->name('student/dashboard');
+        Route::get('parent/dashboard', 'parentDashboardIndex')->middleware(['auth', 'role:Parent'])->name('parent/dashboard');
     });
 
     // ----------------------------- user controller ---------------------//
@@ -76,7 +89,10 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::post('user/update', 'userUpdate')->name('user/update');
         Route::post('user/delete', 'userDelete')->name('user/delete');
         Route::get('get-users-data', 'getUsersData')->name('get-users-data'); /** get all data users */
-
+        Route::get('user/profile/edit', 'editProfile')->middleware('auth')->name('user/profile/edit');
+        Route::post('user/profile/update', 'updateProfile')->middleware('auth')->name('user/profile/update');
+        Route::post('user/password/update', 'updatePassword')->middleware('auth')->name('user/password/update');
+        Route::get('user/activity-log', 'activityLog')->middleware('auth')->name('user/activity-log');
     });
 
     // ------------------------ setting -------------------------------//

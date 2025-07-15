@@ -31,7 +31,7 @@
                             <div class="about-text">Khmer 009</div>
                         </div>
                         <div class="col-auto profile-btn">
-                            <a href="" class="btn btn-primary">Edit</a>
+                            <a href="{{ route('user/profile/edit') }}" class="btn btn-primary">Edit</a>
                         </div>
                     </div>
                 </div>
@@ -81,6 +81,19 @@
                                             <p class="col-sm-3 text-muted text-sm-end mb-0">Address</p>
                                             <p class="col-sm-9 mb-0">Phnome Phenh</p>
                                         </div>
+                                        @php $user = auth()->user(); @endphp
+                                        @if($user->role_name === \App\Models\User::ROLE_STUDENT && $user->student)
+                                        <div class="row">
+                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Student ID</p>
+                                            <p class="col-sm-9">{{ $user->student->admission_id }}</p>
+                                        </div>
+                                        @endif
+                                        @if($user->role_name === \App\Models\User::ROLE_TEACHER && $user->teacher)
+                                        <div class="row">
+                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Teacher ID</p>
+                                            <p class="col-sm-9">{{ $user->teacher->teacher_id }}</p>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
