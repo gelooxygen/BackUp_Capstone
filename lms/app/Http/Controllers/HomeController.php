@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class HomeController extends Controller
 {
@@ -49,13 +50,31 @@ class HomeController extends Controller
     /** admin dashboard */
     public function adminDashboardIndex()
     {
-        return view('dashboard.admin_dashboard');
+        return view('dashboard.home');
     }
 
     /** parent dashboard */
     public function parentDashboardIndex()
     {
         return view('dashboard.parent_dashboard');
+    }
+
+    /**
+     * Unified dashboard route that returns the correct dashboard for each role.
+     */
+    public function dashboard()
+    {
+        $user = auth()->user();
+        if ($user->hasRole(User::ROLE_ADMIN)) {
+            return view('dashboard.home');
+        } elseif ($user->hasRole(User::ROLE_TEACHER)) {
+            return view('dashboard.teacher_dashboard');
+        } elseif ($user->hasRole(User::ROLE_STUDENT)) {
+            return view('dashboard.student_dashboard');
+        } elseif ($user->hasRole(User::ROLE_PARENT)) {
+            return view('dashboard.parent_dashboard');
+        }
+        abort(403);
     }
 
     /**

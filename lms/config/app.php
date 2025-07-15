@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => 'Enhancing Academic Management: A Unified Web Portal with Intelligent Features for Panorama Montessori School Inc.',
 
     /*
     |--------------------------------------------------------------------------

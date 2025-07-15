@@ -172,3 +172,25 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::post('fees/collection/save', 'saveRecord')->middleware('auth')->name('fees/collection/save'); // fees/collection/save
     });
 });
+
+// Admin-only routes
+Route::group(['middleware' => ['role:Admin']], function () {
+    // Place admin-only routes here
+    // Example:
+    // Route::get('admin/users', 'UserManagementController@index')->name('admin.users');
+});
+
+// Teacher-only routes
+Route::group(['middleware' => ['role:Teacher']], function () {
+    // Place teacher-only routes here
+});
+
+// Student-only routes
+Route::group(['middleware' => ['role:Student']], function () {
+    // Place student-only routes here
+});
+
+// Parent-only routes
+Route::group(['middleware' => ['role:Parent']], function () {
+    // Place parent-only routes here
+});
