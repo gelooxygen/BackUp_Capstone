@@ -12,15 +12,57 @@ class StudentController extends Controller
     /** index page student list */
     public function student()
     {
-        $studentList = Student::all();
-        return view('student.student',compact('studentList'));
+        $query = Student::query();
+        if (request()->has('archived') && request('archived') == 1) {
+            $query = $query->onlyTrashed();
+            $showingArchived = true;
+        } else {
+            $showingArchived = false;
+        }
+        // Search/Filter logic
+        if ($id = request('search_id')) {
+            $query->where('id', 'like', "%$id%");
+        }
+        if ($name = request('search_name')) {
+            $query->where(function($q) use ($name) {
+                $q->where('first_name', 'like', "%$name%")
+                  ->orWhere('last_name', 'like', "%$name%")
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ["%$name%"]);
+            });
+        }
+        if ($phone = request('search_phone')) {
+            $query->where('phone_number', 'like', "%$phone%");
+        }
+        $studentList = $query->get();
+        return view('student.student',compact('studentList', 'showingArchived'));
     }
 
     /** index page student grid */
     public function studentGrid()
     {
-        $studentList = Student::all();
-        return view('student.student-grid',compact('studentList'));
+        $query = Student::query();
+        if (request()->has('archived') && request('archived') == 1) {
+            $query = $query->onlyTrashed();
+            $showingArchived = true;
+        } else {
+            $showingArchived = false;
+        }
+        // Search/Filter logic
+        if ($id = request('search_id')) {
+            $query->where('id', 'like', "%$id%");
+        }
+        if ($name = request('search_name')) {
+            $query->where(function($q) use ($name) {
+                $q->where('first_name', 'like', "%$name%")
+                  ->orWhere('last_name', 'like', "%$name%")
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) like ?", ["%$name%"]);
+            });
+        }
+        if ($phone = request('search_phone')) {
+            $query->where('phone_number', 'like', "%$phone%");
+        }
+        $studentList = $query->get();
+        return view('student.student-grid',compact('studentList', 'showingArchived'));
     }
 
     /** student add page */
@@ -139,6 +181,15 @@ class StudentController extends Controller
             Toastr::error('Student deleted fail :)','Error');
             return redirect()->back();
         }
+    }
+
+    /** Restore archived student */
+    public function restore($id)
+    {
+        $student = Student::onlyTrashed()->findOrFail($id);
+        $student->restore();
+        \Brian2694\Toastr\Facades\Toastr::success('Student restored successfully :)','Success');
+        return redirect()->back();
     }
 
     /** student profile page */

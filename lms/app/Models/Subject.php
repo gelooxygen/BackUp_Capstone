@@ -34,4 +34,11 @@ class Subject extends Model
             }
         });
     }
+
+    public function enrollments() { return $this->hasMany(Enrollment::class); }
+    public function students() { return $this->belongsToMany(Student::class, 'enrollments'); }
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class, 'subject_teacher', 'subject_id', 'teacher_id');
+    }
 }

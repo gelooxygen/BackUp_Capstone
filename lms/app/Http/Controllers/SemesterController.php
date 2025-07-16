@@ -12,7 +12,8 @@ class SemesterController extends Controller
      */
     public function index()
     {
-        //
+        $semesters = \App\Models\Semester::with('academicYear')->orderBy('id', 'desc')->get();
+        return view('semesters.index', compact('semesters'));
     }
 
     /**
@@ -20,7 +21,8 @@ class SemesterController extends Controller
      */
     public function create()
     {
-        //
+        $academicYears = \App\Models\AcademicYear::orderBy('start_date', 'desc')->get();
+        return view('semesters.create', compact('academicYears'));
     }
 
     /**
@@ -28,7 +30,12 @@ class SemesterController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+        \App\Models\Semester::create($request->only(['name', 'academic_year_id']));
+        return redirect()->route('semesters.index')->with('success', 'Semester created successfully.');
     }
 
     /**
@@ -42,24 +49,31 @@ class SemesterController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Semester $semester)
+    public function edit(\App\Models\Semester $semester)
     {
-        //
+        $academicYears = \App\Models\AcademicYear::orderBy('start_date', 'desc')->get();
+        return view('semesters.edit', compact('semester', 'academicYears'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Semester $semester)
+    public function update(Request $request, \App\Models\Semester $semester)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+        $semester->update($request->only(['name', 'academic_year_id']));
+        return redirect()->route('semesters.index')->with('success', 'Semester updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Semester $semester)
+    public function destroy(\App\Models\Semester $semester)
     {
-        //
+        $semester->delete();
+        return redirect()->route('semesters.index')->with('success', 'Semester deleted successfully.');
     }
 }

@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use DB;
-use Auth;
-use Session;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -85,7 +85,7 @@ class LoginController extends Controller
                 Session::put('position', $user->position);
                 Session::put('department', $user->department);
                 Toastr::success('Login successfully :)','Success');
-                return redirect()->route('home');
+                return redirect()->route('dashboard');
             } else {
                 Toastr::error('fail, WRONG USERNAME OR PASSWORD :)','Error');
                 return redirect('login');

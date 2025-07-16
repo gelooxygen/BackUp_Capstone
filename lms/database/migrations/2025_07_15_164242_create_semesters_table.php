@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('semesters', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->unsignedBigInteger('academic_year_id');
+            $table->foreign('academic_year_id')->references('id')->on('academic_years')->onDelete('cascade');
             $table->timestamps();
         });
     }

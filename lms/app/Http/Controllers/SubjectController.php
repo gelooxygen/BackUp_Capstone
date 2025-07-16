@@ -98,4 +98,22 @@ class SubjectController extends Controller
         }
     }
 
+    /** Show form to assign teachers to a subject */
+    public function assignTeachersForm($id)
+    {
+        $subject = Subject::findOrFail($id);
+        $teachers = \App\Models\Teacher::all();
+        $assigned = $subject->teachers->pluck('id')->toArray();
+        return view('subjects.assign_teachers', compact('subject', 'teachers', 'assigned'));
+    }
+
+    /** Handle assignment of teachers to a subject */
+    public function assignTeachers(Request $request, $id)
+    {
+        $subject = Subject::findOrFail($id);
+        $teacherIds = $request->input('teacher_ids', []);
+        $subject->teachers()->sync($teacherIds);
+        \Brian2694\Toastr\Facades\Toastr::success('Teachers assigned successfully :)', 'Success');
+        return redirect()->route('subject/list/page');
+    }
 }

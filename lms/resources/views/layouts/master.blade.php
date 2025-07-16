@@ -27,10 +27,10 @@
         <div class="header">
             <div class="header-left">
                 <a href="{{ route('home') }}" class="logo">
-                    <img src="{{ URL::to('assets/img/logo.png') }}" alt="Logo">
+                    <img src="/images/Logo.jpg" alt="Logo">
                 </a>
                 <a href="{{ route('home') }}" class="logo logo-small">
-                    <img src="{{ URL::to('assets/img/logo-small.png') }}" alt="Logo" width="30" height="30">
+                    <img src="/images/Logo.jpg" alt="Logo" width="30" height="30">
                 </a>
             </div>
             <div class="menu-toggle">

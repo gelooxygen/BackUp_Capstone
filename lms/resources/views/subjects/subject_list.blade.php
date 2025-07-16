@@ -102,6 +102,9 @@
                                                     <a class="btn btn-sm bg-danger-light delete" data-bs-toggle="modal" data-bs-target="#delete">
                                                         <i class="fe fe-trash-2"></i>
                                                     </a>
+                                                    <a href="{{ route('subjects.assignTeachersForm', $value->id ?? $value->subject_id) }}" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-chalkboard-teacher"></i> Assign Teachers
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>

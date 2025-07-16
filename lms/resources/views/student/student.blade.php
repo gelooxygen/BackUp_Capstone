@@ -19,27 +19,45 @@
             {{-- message --}}
             {!! Toastr::message() !!}
             <div class="student-group-form">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by ID ...">
+                <form method="GET" action="{{ route('student/list') }}">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="search_id" class="form-control" placeholder="Search by ID ..." value="{{ request('search_id') }}">
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="search_name" class="form-control" placeholder="Search by Name ..." value="{{ request('search_name') }}">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="search_phone" class="form-control" placeholder="Search by Phone ..." value="{{ request('search_phone') }}">
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="search-student-btn">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Name ...">
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Search by Phone ...">
-                        </div>
-                    </div>
-                    <div class="col-lg-2">
-                        <div class="search-student-btn">
-                            <button type="btn" class="btn btn-primary">Search</button>
-                        </div>
-                    </div>
+                </form>
+            </div>
+            <div class="row align-items-center mb-3">
+                <div class="col">
+                    @if($showingArchived)
+                        <h4>Archived Students</h4>
+                    @else
+                        <h4>Active Students</h4>
+                    @endif
+                </div>
+                <div class="col-auto">
+                    @if($showingArchived)
+                        <a href="{{ route('student/list') }}" class="btn btn-secondary">Show Active</a>
+                    @else
+                        <a href="{{ route('student/list') }}?archived=1" class="btn btn-warning">Show Archived</a>
+                    @endif
                 </div>
             </div>
             <div class="row">
@@ -113,9 +131,16 @@
                                                     <a href="{{ url('student/edit/'.$list->id) }}" class="btn btn-sm bg-danger-light">
                                                         <i class="far fa-edit me-2"></i>
                                                     </a>
-                                                    <a class="btn btn-sm bg-danger-light student_delete" data-bs-toggle="modal" data-bs-target="#studentUser">
-                                                        <i class="far fa-trash-alt me-2"></i>
-                                                    </a>
+                                                    @if($showingArchived)
+                                                        <form action="{{ url('student/restore/'.$list->id) }}" method="POST" style="display:inline-block;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-success">Restore</button>
+                                                        </form>
+                                                    @else
+                                                        <a class="btn btn-sm bg-danger-light student_delete" data-bs-toggle="modal" data-bs-target="#studentUser">
+                                                            <i class="far fa-trash-alt me-2"></i>
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

@@ -24,4 +24,9 @@ class Teacher extends Model
         'zip_code',
         'country',
     ];
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'subject_teacher', 'teacher_id', 'subject_id');
+    }
 }

@@ -117,7 +117,7 @@
                                     <li><span class="circle-blue"></span>Girls</li>
                                     <li><span class="circle-green"></span>Boys</li>
                                     <li class="star-menus"><a href="javascript:;"><i
-                                                class="fas fa-ellipsis-v"></i></a></li>
+                                                class="fas fa-ellipsis-v    "></i></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -157,7 +157,7 @@
                                     <tr>
                                         <td class="text-nowrap">
                                             <div>PRE2209</div>
-                                        </td>
+                                        </td>   
                                         <td class="text-nowrap">
                                             <a href="profile.html">
                                                 <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy

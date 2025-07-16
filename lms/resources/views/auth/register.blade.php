@@ -21,11 +21,12 @@
                 <input type="hidden" class="image" name="image" value="photo_defaults.jpg">
                 <div class="form-group local-forms">
                     <label>Role Name <span class="login-danger">*</span></label>
-                    <select class="form-control select @error('role_name') is-invalid @enderror" name="role_name" id="role_name">
+                    <select class="form-control select @error('role_name') is-invalid @enderror" name="role_name" id="role_name" required>
                         <option selected disabled>Role Type</option>
-                        @foreach ($role as $name)
-                            <option value="{{ $name->role_type }}">{{ $name->role_type }}</option>
-                        @endforeach
+                        <option value="Admin">Admin</option>
+                        <option value="Parent">Parent</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Student">Student</option>
                     </select>
                     @error('role_name')
                     <span class="invalid-feedback" role="alert">

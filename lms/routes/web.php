@@ -14,6 +14,9 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\AccountsController;
 use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\SectionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +115,9 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::get('student/profile/{id}', 'studentProfile')->middleware('auth'); // profile student
     });
 
+    // Restore archived student
+    Route::post('student/restore/{id}', [App\Http\Controllers\StudentController::class, 'restore'])->name('student.restore');
+
     // ------------------------ teacher -------------------------------//
     Route::controller(TeacherController::class)->group(function () {
         Route::get('teacher/add/page', 'teacherAdd')->middleware('auth')->name('teacher/add/page'); // page teacher
@@ -173,6 +179,11 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
     });
 });
 
+// Add resource routes for academic years and enrollments
+Route::resource('academic_years', AcademicYearController::class)->middleware('auth');
+Route::resource('enrollments', EnrollmentController::class)->middleware('auth');
+Route::resource('sections', SectionController::class)->middleware('auth');
+
 // Admin-only routes
 Route::group(['middleware' => ['role:Admin']], function () {
     // Place admin-only routes here
@@ -194,3 +205,8 @@ Route::group(['middleware' => ['role:Student']], function () {
 Route::group(['middleware' => ['role:Parent']], function () {
     // Place parent-only routes here
 });
+
+Route::get('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachersForm'])->name('subjects.assignTeachersForm');
+Route::post('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachers'])->name('subjects.assignTeachers');
+Route::get('sections/{id}/assign-students', [SectionController::class, 'assignStudentsForm'])->name('sections.assignStudentsForm');
+Route::post('sections/{id}/assign-students', [SectionController::class, 'assignStudents'])->name('sections.assignStudents');

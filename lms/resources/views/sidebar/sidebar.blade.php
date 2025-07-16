@@ -23,8 +23,6 @@
                     </a>
                     <ul>
                         <li><a href="{{ route('home') }}" class="{{set_active(['home'])}}">Admin Dashboard</a></li>
-                        <li><a href="{{ route('teacher/dashboard') }}" class="{{set_active(['teacher/dashboard'])}}">Teacher Dashboard</a></li>
-                        <li><a href="{{ route('student/dashboard') }}" class="{{set_active(['student/dashboard'])}}">Student Dashboard</a></li>
                     </ul>
                 </li>
                 @if (Session::get('role_name') === 'Admin' || Session::get('role_name') === 'Super Admin')
@@ -85,54 +83,47 @@
                     </a>
                     <ul>
                         <li><a class="{{set_active(['subject/list/page'])}} {{ request()->is('subject/edit/*') ? 'active' : '' }}" href="{{ route('subject/list/page') }}">Subject List</a></li>
-                        <li><a class="{{set_active(['subject/add/page'])}}" href="{{ route('subject/add/page') }}">Subject Add</a></li>
-                        <li><a>Subject Edit</a></li>
+                        <li><a class="{{set_active(['subject/add/page'])}}" href="{{ route('subject/add/page') }}">Subject Add</a></li> 
                     </ul>
                 </li>
 
-                <li class="submenu {{set_active(['invoice/list/page','invoice/paid/page',
-                    'invoice/overdue/page','invoice/draft/page','invoice/recurring/page',
-                    'invoice/cancelled/page','invoice/grid/page','invoice/add/page',
-                    'invoice/view/page','invoice/settings/page',
-                    'invoice/settings/tax/page','invoice/settings/bank/page'])}}" {{ request()->is('invoice/edit/*') ? 'active' : '' }}>
-                    <a href="#"><i class="fas fa-clipboard"></i>
-                        <span> Invoices</span>
+                <li class="submenu {{ set_active(['sections.index', 'sections.create']) }}">
+                    <a href="#"><i class="fas fa-users"></i>
+                        <span> Sections</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a class="{{set_active(['invoice/list/page','invoice/paid/page','invoice/overdue/page','invoice/draft/page','invoice/recurring/page','invoice/cancelled/page'])}}" href="{{ route('invoice/list/page') }}">Invoices List</a></li>
-                        <li><a class="{{set_active(['invoice/grid/page'])}}" href="{{ route('invoice/grid/page') }}">Invoices Grid</a></li>
-                        <li><a class="{{set_active(['invoice/add/page'])}}" href="{{ route('invoice/add/page') }}">Add Invoices</a></li>
-                        <li><a class="{{ request()->is('invoice/edit/*') ? 'active' : '' }}" href="">Edit Invoices</a></li>
-                        <li> <a class="{{ request()->is('invoice/view/*') ? 'active' : '' }}" href="">Invoices Details</a></li>
-                        <li><a class="{{set_active(['invoice/settings/page','invoice/settings/tax/page','invoice/settings/bank/page'])}}" href="{{ route('invoice/settings/page') }}">Invoices Settings</a></li>
+                        <li><a href="{{ route('sections.index') }}" class="{{ set_active(['sections.index']) }}">Section List</a></li>
+                        <li><a href="{{ route('sections.create') }}" class="{{ set_active(['sections.create']) }}">Add Section</a></li>
                     </ul>
                 </li>
-
+    
                 <li class="menu-title">
                     <span>Management</span>
                 </li>
 
-                <li class="submenu {{set_active(['account/fees/collections/page','add/fees/collection/page'])}}">
-                    <a href="#"><i class="fas fa-file-invoice-dollar"></i>
-                        <span> Accounts</span>
+                @if (Session::get('role_name') === 'Admin')
+                <li class="submenu {{ set_active(['academic_years.index', 'academic_years.create']) }}">
+                    <a href="#"><i class="fas fa-calendar-alt"></i>
+                        <span> Academic Year</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a class="{{set_active(['account/fees/collections/page'])}}" href="{{ route('account/fees/collections/page') }}">Fees Collection</a></li>
-                        <li><a href="expenses.html">Expenses</a></li>
-                        <li><a href="salary.html">Salary</a></li>
-                        <li><a class="{{set_active(['add/fees/collection/page'])}}" href="{{ route('add/fees/collection/page') }}">Add Fees</a></li>
-                        <li><a href="add-expenses.html">Add Expenses</a></li>
-                        <li><a href="add-salary.html">Add Salary</a></li>
+                        <li><a href="{{ route('academic_years.index') }}" class="{{ set_active(['academic_years.index']) }}">Academic Year List</a></li>
+                        <li><a href="{{ route('academic_years.create') }}" class="{{ set_active(['academic_years.create']) }}">Add Academic Year</a></li>
                     </ul>
                 </li>
-                <li>
-                    <a href="holiday.html"><i class="fas fa-holly-berry"></i> <span>Holiday</span></a>
+                <li class="submenu {{ set_active(['enrollments.index', 'enrollments.create']) }}">
+                    <a href="#"><i class="fas fa-user-plus"></i>
+                        <span> Enrollment</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('enrollments.index') }}" class="{{ set_active(['enrollments.index']) }}">Enrollment List</a></li>
+                        <li><a href="{{ route('enrollments.create') }}" class="{{ set_active(['enrollments.create']) }}">Add Enrollment</a></li>
+                    </ul>
                 </li>
-                <li>
-                    <a href="fees.html"><i class="fas fa-comment-dollar"></i> <span>Fees</span></a>
-                </li>
+                @endif
                 <li>
                     <a href="exam.html"><i class="fas fa-clipboard-list"></i> <span>Exam list</span></a>
                 </li>

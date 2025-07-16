@@ -50,7 +50,7 @@ class HomeController extends Controller
     /** admin dashboard */
     public function adminDashboardIndex()
     {
-        return view('dashboard.home');
+        return view('dashboard.admin_dashboard');
     }
 
     /** parent dashboard */
@@ -65,13 +65,13 @@ class HomeController extends Controller
     public function dashboard()
     {
         $user = auth()->user();
-        if ($user->hasRole(User::ROLE_ADMIN)) {
-            return view('dashboard.home');
-        } elseif ($user->hasRole(User::ROLE_TEACHER)) {
+        if ($user->role_name === User::ROLE_ADMIN) {
+            return view('dashboard.admin_dashboard');
+        } elseif ($user->role_name === User::ROLE_TEACHER) {
             return view('dashboard.teacher_dashboard');
-        } elseif ($user->hasRole(User::ROLE_STUDENT)) {
+        } elseif ($user->role_name === User::ROLE_STUDENT) {
             return view('dashboard.student_dashboard');
-        } elseif ($user->hasRole(User::ROLE_PARENT)) {
+        } elseif ($user->role_name === User::ROLE_PARENT) {
             return view('dashboard.parent_dashboard');
         }
         abort(403);
