@@ -18,7 +18,7 @@
                         </ul>
                     </li>
                     <li class="submenu">
-                        <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span>Class & Subject Management</span> <span class="menu-arrow"></span></a>
+                        <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span>Class & Subject </span> <span class="menu-arrow"></span></a>
                         <ul>
                             <li><a href="{{ route('sections.index') }}">Sections</a></li>
                             <li><a href="{{ route('subject/list/page') }}">Subjects</a></li>

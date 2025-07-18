@@ -22,7 +22,7 @@
                 <div class="form-group local-forms">
                     <label>Role Name <span class="login-danger">*</span></label>
                     <select class="form-control select @error('role_name') is-invalid @enderror" name="role_name" id="role_name" required>
-                        <option selected disabled>Role Type</option>
+                        <option value="" selected disabled hidden>Role Type</option>
                         <option value="Admin">Admin</option>
                         <option value="Parent">Parent</option>
                         <option value="Teacher">Teacher</option>
@@ -32,7 +32,8 @@
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
-                @enderror
+                    @enderror
+                    <span id="roleError" class="text-danger" style="display:none; font-size:13px;">Please select a role.</span>
                 </div>
                 
                 <div class="form-group">
@@ -50,6 +51,18 @@
                     <button class="btn btn-primary btn-block" type="submit">Register</button>
                 </div>
             </form>
+            <script>
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    var role = document.getElementById('role_name').value;
+                    var error = document.getElementById('roleError');
+                    if (!role) {
+                        e.preventDefault();
+                        error.style.display = 'block';
+                    } else {
+                        error.style.display = 'none';
+                    }
+                });
+            </script>
             <div class="login-or">
                 <span class="or-line"></span>
                 <span class="span-or">or</span>
