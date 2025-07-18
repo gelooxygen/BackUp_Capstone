@@ -30,8 +30,18 @@
     $(document).on('click', '#mobile_btn', function() {
         $wrapper.toggleClass('slide-nav');
         $('.sidebar-overlay').toggleClass('opened');
-        $('html').addClass('menu-opened');
+        if ($wrapper.hasClass('slide-nav')) {
+            $('html').addClass('menu-opened');
+        } else {
+            $('html').removeClass('menu-opened');
+        }
         return false;
+    });
+    // Fix: Close sidebar when overlay is clicked
+    $(document).on('click', '.sidebar-overlay', function() {
+        $wrapper.removeClass('slide-nav');
+        $('.sidebar-overlay').removeClass('opened');
+        $('html').removeClass('menu-opened');
     });
     if ($('.toggle-password').length > 0) {
         $(document).on('click', '.toggle-password', function() {
@@ -55,11 +65,6 @@
             }
         });
     }
-    $(".sidebar-overlay").on("click", function() {
-        $wrapper.removeClass('slide-nav');
-        $(".sidebar-overlay").removeClass("opened");
-        $('html').removeClass('menu-opened');
-    });
     $(document).on("click", ".logo-hide-btn", function() {
         $(this).parent().hide();
     });
@@ -183,15 +188,37 @@
         });
     }
     $(document).on('click', '#toggle_btn', function() {
-        if ($('body').hasClass('mini-sidebar')) {
-            $('body').removeClass('mini-sidebar');
-            $('.subdrop + ul').slideDown();
+        if ($(window).width() > 991) {
+            if ($('body').hasClass('mini-sidebar')) {
+                $('body').removeClass('mini-sidebar');
+                $('.subdrop + ul').slideDown();
+            } else {
+                $('body').addClass('mini-sidebar');
+                $('.subdrop + ul').slideUp();
+            }
         } else {
-            $('body').addClass('mini-sidebar');
-            $('.subdrop + ul').slideUp();
+            // Mobile: fallback to mobile sidebar logic
+            $wrapper.toggleClass('slide-nav');
+            $('.sidebar-overlay').toggleClass('opened');
+            if ($wrapper.hasClass('slide-nav')) {
+                $('html').addClass('menu-opened');
+            } else {
+                $('html').removeClass('menu-opened');
+            }
         }
         setTimeout(function() {}, 300);
         return false;
+    });
+    // Show submenu tooltips on hover in mini-sidebar mode
+    $(document).on('mouseenter', '.mini-sidebar .sidebar-menu > ul > li', function() {
+        if ($('body').hasClass('mini-sidebar')) {
+            $(this).find('ul').css({display: 'block', position: 'absolute', left: '100%', top: 0, zIndex: 2000});
+        }
+    });
+    $(document).on('mouseleave', '.mini-sidebar .sidebar-menu > ul > li', function() {
+        if ($('body').hasClass('mini-sidebar')) {
+            $(this).find('ul').css({display: 'none'});
+        }
     });
     $(document).on('mouseover', function(e) {
         e.stopPropagation();

@@ -178,6 +178,7 @@
         </div>
 		{{-- side bar --}}
 		@include('sidebar.sidebar')
+        <div class="sidebar-overlay"></div>
 		{{-- content page --}}
         @yield('content')
         <footer>
