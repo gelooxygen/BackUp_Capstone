@@ -46,5 +46,10 @@ class DatabaseSeeder extends Seeder
         \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Teacher']);
         \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Student']);
         \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Parent']);
+
+        $this->call([
+            CurriculumSeeder::class,
+            CurriculumSubjectSeeder::class,
+        ]);
     }
 }

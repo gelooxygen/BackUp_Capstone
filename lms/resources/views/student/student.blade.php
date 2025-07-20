@@ -31,6 +31,16 @@
                                 <input type="text" name="search_name" class="form-control" placeholder="Search by Name ..." value="{{ request('search_name') }}">
                             </div>
                         </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="search_class" class="form-control" placeholder="Search by Class ..." value="{{ request('search_class') }}">
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="search_year_level" class="form-control" placeholder="Search by Year Level ..." value="{{ request('search_year_level') }}">
+                            </div>
+                        </div>
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
                                 <input type="text" name="search_phone" class="form-control" placeholder="Search by Phone ..." value="{{ request('search_phone') }}">

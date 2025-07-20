@@ -29,4 +29,9 @@ class Teacher extends Model
     {
         return $this->belongsToMany(Subject::class, 'subject_teacher', 'teacher_id', 'subject_id');
     }
+
+    public function gradeLevels()
+    {
+        return $this->hasMany(\App\Models\TeacherGradeLevel::class, 'teacher_id');
+    }
 }

@@ -34,6 +34,10 @@
                     <li><a href="#"><i class="fas fa-file-alt"></i> <span>Reports & Logs</span></a></li>
                     <li><a href="{{ route('setting/page') }}"><i class="fas fa-cog"></i> <span>System Settings</span></a></li>
                     <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Announcement Management</span></a></li>
+                    {{-- Curriculum Management only for Admins --}}
+                    <li>
+                        <a href="{{ route('curriculum.index') }}"><i class="fas fa-book"></i> <span>Curriculum Management</span></a>
+                    </li>
                 @endif
 
                 {{-- TEACHER SIDEBAR --}}
@@ -42,11 +46,14 @@
                         <a href="{{ route('teacher/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
                     <li><a href="#"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
-                    <li><a href="#"><i class="fas fa-user-check"></i> <span>Student Attendance</span></a></li>
+                    <li>
+                        <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+                    </li> 
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grade Entry</span></a></li>
                     <li><a href="#"><i class="fas fa-upload"></i> <span>Upload Lesson Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Class Announcements</span></a></li>
                     <li><a href="#"><i class="fas fa-user"></i> <span>Student Profiles</span></a></li>
+                   
                 @endif
 
                 {{-- STUDENT SIDEBAR --}}

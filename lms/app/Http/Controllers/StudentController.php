@@ -33,6 +33,12 @@ class StudentController extends Controller
         if ($phone = request('search_phone')) {
             $query->where('phone_number', 'like', "%$phone%");
         }
+        if ($class = request('search_class')) {
+            $query->where('class', 'like', "%$class%");
+        }
+        if ($year = request('search_year_level')) {
+            $query->where('year_level', 'like', "%$year%");
+        }
         $studentList = $query->get();
         return view('student.student',compact('studentList', 'showingArchived'));
     }
@@ -60,6 +66,12 @@ class StudentController extends Controller
         }
         if ($phone = request('search_phone')) {
             $query->where('phone_number', 'like', "%$phone%");
+        }
+        if ($class = request('search_class')) {
+            $query->where('class', 'like', "%$class%");
+        }
+        if ($year = request('search_year_level')) {
+            $query->where('year_level', 'like', "%$year%");
         }
         $studentList = $query->get();
         return view('student.student-grid',compact('studentList', 'showingArchived'));

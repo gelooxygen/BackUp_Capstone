@@ -19,6 +19,7 @@ class Student extends Model
         'religion',
         'email',
         'class',
+        'year_level',
         'section',
         'admission_id',
         'phone_number',
@@ -30,5 +31,9 @@ class Student extends Model
     public function sections()
     {
         return $this->belongsToMany(Section::class, 'section_student', 'student_id', 'section_id');
+    }
+
+    public function attendances() {
+        return $this->hasMany(Attendance::class);
     }
 }

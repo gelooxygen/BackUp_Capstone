@@ -137,4 +137,27 @@ class TeacherController extends Controller
             return redirect()->back();
         }
     }
+
+    /** Show form to assign grade levels to a teacher */
+    public function assignGradeLevelsForm($id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        $assigned = $teacher->gradeLevels->pluck('grade_level')->toArray();
+        // Example grade levels, you may want to fetch from a config or table
+        $gradeLevels = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'];
+        return view('teacher.assign_grade_levels', compact('teacher', 'gradeLevels', 'assigned'));
+    }
+
+    /** Handle assignment of grade levels to a teacher */
+    public function assignGradeLevels(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail($id);
+        $gradeLevels = $request->input('grade_levels', []);
+        // Remove all and re-add
+        $teacher->gradeLevels()->delete();
+        foreach ($gradeLevels as $level) {
+            $teacher->gradeLevels()->create(['grade_level' => $level]);
+        }
+        return redirect()->route('teacher/list/page')->with('success', 'Grade levels assigned successfully.');
+    }
 }

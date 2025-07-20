@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\SectionController;
+use App\Http\Controllers\AttendanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -183,6 +184,13 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 Route::resource('academic_years', AcademicYearController::class)->middleware('auth');
 Route::resource('enrollments', EnrollmentController::class)->middleware('auth');
 Route::resource('sections', SectionController::class)->middleware('auth');
+Route::resource('attendance', AttendanceController::class);
+Route::get('attendance/export', [App\Http\Controllers\AttendanceController::class, 'export'])->name('attendance.export');
+
+// Curriculum Management
+Route::resource('curriculum', App\Http\Controllers\CurriculumController::class);
+Route::get('curriculum/{id}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjectsForm'])->name('curriculum.assignSubjectsForm');
+Route::post('curriculum/{id}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjects'])->name('curriculum.assignSubjects');
 
 // Admin-only routes
 Route::group(['middleware' => ['role:Admin']], function () {
@@ -210,3 +218,5 @@ Route::get('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTe
 Route::post('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachers'])->name('subjects.assignTeachers');
 Route::get('sections/{id}/assign-students', [SectionController::class, 'assignStudentsForm'])->name('sections.assignStudentsForm');
 Route::post('sections/{id}/assign-students', [SectionController::class, 'assignStudents'])->name('sections.assignStudents');
+Route::get('teacher/{id}/assign-grade-levels', [App\Http\Controllers\TeacherController::class, 'assignGradeLevelsForm'])->name('teacher.assignGradeLevelsForm');
+Route::post('teacher/{id}/assign-grade-levels', [App\Http\Controllers\TeacherController::class, 'assignGradeLevels'])->name('teacher.assignGradeLevels');
