@@ -44,11 +44,11 @@ class AcademicAnalyticsService
         return [
             'teacher' => $teacher,
             'class_averages' => $this->getTeacherClassAverages($teacherId, $academicYearId, $semesterId),
-            'top_performers' => $this->getTeacherTopPerformers($teacherId, $academicYearId, $semesterId),
-            'low_performers' => $this->getTeacherLowPerformers($teacherId, $academicYearId, $semesterId),
+            'top_students' => $this->getTeacherTopStudents($teacherId, $academicYearId, $semesterId),
             'attendance_overview' => $this->getTeacherAttendanceOverview($teacherId, $academicYearId, $semesterId),
             'assessment_breakdown' => $this->getTeacherAssessmentBreakdown($teacherId, $academicYearId, $semesterId),
-            'class_performance_trends' => $this->getTeacherClassPerformanceTrends($teacherId, $academicYearId, $semesterId)
+            'recent_grades' => $this->getTeacherRecentGrades($teacherId),
+            'class_performance' => $this->getTeacherClassPerformance($teacherId, $academicYearId, $semesterId)
         ];
     }
 
@@ -59,11 +59,11 @@ class AcademicAnalyticsService
     {
         return [
             'school_overview' => $this->getSchoolOverview($academicYearId, $semesterId),
-            'year_level_comparison' => $this->getYearLevelComparison($academicYearId, $semesterId),
-            'section_performance' => $this->getSectionPerformance($academicYearId, $semesterId),
-            'attendance_summary' => $this->getSchoolAttendanceSummary($academicYearId, $semesterId),
+            'gpa_comparison' => $this->getGpaComparison($academicYearId, $semesterId),
             'pass_fail_rates' => $this->getPassFailRates($academicYearId, $semesterId),
-            'subject_performance' => $this->getSchoolSubjectPerformance($academicYearId, $semesterId)
+            'attendance_summary' => $this->getSchoolAttendanceSummary($academicYearId, $semesterId),
+            'subject_performance' => $this->getSchoolSubjectPerformance($academicYearId, $semesterId),
+            'section_comparison' => $this->getSectionComparison($academicYearId, $semesterId)
         ];
     }
 
@@ -107,29 +107,30 @@ class AcademicAnalyticsService
         $attendance = $query->get();
 
         $monthlyData = [];
-        for ($month = 1; $month <= 12; $month++) {
-            $monthAttendance = $attendance->filter(function($record) use ($month) {
-                return $record->date->month === $month;
-            });
+        foreach ($attendance as $record) {
+            // Ensure date is a Carbon instance
+            $date = $record->date instanceof Carbon ? $record->date : Carbon::parse($record->date);
+            $month = $date->format('Y-m');
+            if (!isset($monthlyData[$month])) {
+                $monthlyData[$month] = ['present' => 0, 'total' => 0];
+            }
+            $monthlyData[$month]['total']++;
+            if ($record->status === 'present') {
+                $monthlyData[$month]['present']++;
+            }
+        }
 
-            $totalDays = $monthAttendance->count();
-            $presentDays = $monthAttendance->where('status', 'present')->count();
-            $percentage = $totalDays > 0 ? ($presentDays / $totalDays) * 100 : 0;
-
-            $monthlyData[] = [
-                'month' => date('F', mktime(0, 0, 0, $month, 1)),
-                'total_days' => $totalDays,
-                'present_days' => $presentDays,
-                'percentage' => round($percentage, 2)
+        $summary = [];
+        foreach ($monthlyData as $month => $data) {
+            $summary[] = [
+                'month' => Carbon::createFromFormat('Y-m', $month)->format('M Y'),
+                'percentage' => round(($data['present'] / $data['total']) * 100, 2),
+                'present' => $data['present'],
+                'total' => $data['total']
             ];
         }
 
-        return [
-            'monthly_data' => $monthlyData,
-            'overall_percentage' => $this->calculateOverallAttendancePercentage($attendance),
-            'total_days' => $attendance->count(),
-            'present_days' => $attendance->where('status', 'present')->count()
-        ];
+        return $summary;
     }
 
     /**
@@ -144,17 +145,18 @@ class AcademicAnalyticsService
 
         $grades = $query->get();
 
+        $totalGrades = $grades->count();
         $averageScore = $grades->avg('percentage') ?? 0;
         $lowGrades = $grades->where('percentage', '<', 75)->count();
         $excellentGrades = $grades->where('percentage', '>=', 90)->count();
 
         return [
+            'total_assignments' => $totalGrades,
             'average_score' => round($averageScore, 2),
             'low_grades_count' => $lowGrades,
             'excellent_grades_count' => $excellentGrades,
-            'total_assignments' => $grades->count(),
             'performance_level' => $this->getPerformanceLevel($averageScore),
-            'alerts' => $this->generateStudentAlerts($grades, $studentId)
+            'improvement_needed' => $lowGrades > 0
         ];
     }
 
@@ -164,7 +166,7 @@ class AcademicAnalyticsService
     private function getStudentSubjectPerformance($studentId, $academicYearId = null, $semesterId = null)
     {
         $query = Grade::where('student_id', $studentId)
-            ->with(['subject']);
+            ->with('subject');
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
@@ -174,13 +176,12 @@ class AcademicAnalyticsService
         $subjectPerformance = [];
         foreach ($grades->groupBy('subject_id') as $subjectId => $subjectGrades) {
             $subject = $subjectGrades->first()->subject;
-            $averageScore = $subjectGrades->avg('percentage');
-            
             $subjectPerformance[] = [
-                'subject_name' => $subject->subject_name,
-                'average_score' => round($averageScore, 2),
+                'subject' => $subject->subject_name,
+                'average_score' => round($subjectGrades->avg('percentage'), 2),
                 'assignments_count' => $subjectGrades->count(),
-                'performance_level' => $this->getPerformanceLevel($averageScore)
+                'highest_score' => $subjectGrades->max('percentage'),
+                'lowest_score' => $subjectGrades->min('percentage')
             ];
         }
 
@@ -188,31 +189,45 @@ class AcademicAnalyticsService
     }
 
     /**
+     * Get student recent activities
+     */
+    private function getStudentRecentActivities($studentId)
+    {
+        return ActivitySubmission::where('student_id', $studentId)
+            ->with(['activity.lesson.subject'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($submission) {
+                return [
+                    'activity' => $submission->activity->title,
+                    'subject' => $submission->activity->lesson->subject->subject_name,
+                    'submitted_at' => $submission->created_at->format('M d, Y'),
+                    'status' => $submission->status,
+                    'score' => $submission->total_score ?? '-'
+                ];
+            });
+    }
+
+    /**
      * Get student GPA trend
      */
     private function getStudentGpaTrend($studentId, $academicYearId = null, $semesterId = null)
     {
-        $query = Grade::where('student_id', $studentId)
-            ->with(['academicYear', 'semester']);
+        $query = DB::table('student_gpa')->where('student_id', $studentId);
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
 
-        $grades = $query->orderBy('created_at')->get();
-
-        $gpaTrend = [];
-        foreach ($grades->groupBy(function($grade) {
-            return $grade->academicYear->name . ' - ' . $grade->semester->name;
-        }) as $period => $periodGrades) {
-            $gpa = $this->calculateGPA($periodGrades);
-            $gpaTrend[] = [
-                'period' => $period,
-                'gpa' => round($gpa, 2),
-                'date' => $periodGrades->first()->created_at->format('Y-m-d')
-            ];
-        }
-
-        return $gpaTrend;
+        return $query->orderBy('created_at')
+            ->get()
+            ->map(function($gpa) {
+                return [
+                    'period' => $gpa->academic_year_name . ' - ' . $gpa->semester_name,
+                    'gpa' => $gpa->gpa,
+                    'letter_grade' => $gpa->letter_grade
+                ];
+            });
     }
 
     /**
@@ -222,7 +237,7 @@ class AcademicAnalyticsService
     {
         $query = Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
             $q->where('teacher_id', $teacherId);
-        })->with(['subject', 'student']);
+        })->with(['subject', 'academicYear', 'semester']);
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
@@ -232,12 +247,10 @@ class AcademicAnalyticsService
         $classAverages = [];
         foreach ($grades->groupBy('subject_id') as $subjectId => $subjectGrades) {
             $subject = $subjectGrades->first()->subject;
-            $averageScore = $subjectGrades->avg('percentage');
-            
             $classAverages[] = [
-                'subject_name' => $subject->subject_name,
-                'average_score' => round($averageScore, 2),
-                'students_count' => $subjectGrades->groupBy('student_id')->count(),
+                'subject' => $subject->subject_name,
+                'average_score' => round($subjectGrades->avg('percentage'), 2),
+                'total_students' => $subjectGrades->groupBy('student_id')->count(),
                 'assignments_count' => $subjectGrades->count()
             ];
         }
@@ -246,13 +259,13 @@ class AcademicAnalyticsService
     }
 
     /**
-     * Get teacher top performers
+     * Get teacher top students
      */
-    private function getTeacherTopPerformers($teacherId, $academicYearId = null, $semesterId = null)
+    private function getTeacherTopStudents($teacherId, $academicYearId = null, $semesterId = null)
     {
         $query = Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
             $q->where('teacher_id', $teacherId);
-        })->with(['subject', 'student']);
+        })->with(['student', 'subject']);
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
@@ -262,47 +275,23 @@ class AcademicAnalyticsService
         $studentAverages = [];
         foreach ($grades->groupBy('student_id') as $studentId => $studentGrades) {
             $student = $studentGrades->first()->student;
-            $averageScore = $studentGrades->avg('percentage');
-            
             $studentAverages[] = [
                 'student_name' => $student->first_name . ' ' . $student->last_name,
-                'average_score' => round($averageScore, 2),
-                'assignments_count' => $studentGrades->count()
+                'average_score' => round($studentGrades->avg('percentage'), 2),
+                'assignments_count' => $studentGrades->count(),
+                'subjects_count' => $studentGrades->groupBy('subject_id')->count()
             ];
         }
 
-        return collect($studentAverages)->sortByDesc('average_score')->take(10)->values();
-    }
+        // Sort by average score descending
+        usort($studentAverages, function($a, $b) {
+            return $b['average_score'] <=> $a['average_score'];
+        });
 
-    /**
-     * Get teacher low performers
-     */
-    private function getTeacherLowPerformers($teacherId, $academicYearId = null, $semesterId = null)
-    {
-        $query = Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
-            $q->where('teacher_id', $teacherId);
-        })->with(['subject', 'student']);
-
-        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
-        if ($semesterId) $query->where('semester_id', $semesterId);
-
-        $grades = $query->get();
-
-        $studentAverages = [];
-        foreach ($grades->groupBy('student_id') as $studentId => $studentGrades) {
-            $student = $studentGrades->first()->student;
-            $averageScore = $studentGrades->avg('percentage');
-            
-            if ($averageScore < 75) { // Only include low performers
-                $studentAverages[] = [
-                    'student_name' => $student->first_name . ' ' . $student->last_name,
-                    'average_score' => round($averageScore, 2),
-                    'assignments_count' => $studentGrades->count()
-                ];
-            }
-        }
-
-        return collect($studentAverages)->sortBy('average_score')->take(10)->values();
+        return [
+            'top_students' => array_slice($studentAverages, 0, 5),
+            'lowest_students' => array_slice($studentAverages, -5)
+        ];
     }
 
     /**
@@ -310,8 +299,10 @@ class AcademicAnalyticsService
      */
     private function getTeacherAttendanceOverview($teacherId, $academicYearId = null, $semesterId = null)
     {
-        // Get sections taught by the teacher
-        $sections = Section::where('adviser_id', $teacherId)->pluck('id');
+        // Get sections taught by this teacher
+        $sections = Section::whereHas('subjects.teachers', function($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })->pluck('id');
 
         $query = Attendance::whereIn('section_id', $sections);
 
@@ -320,24 +311,21 @@ class AcademicAnalyticsService
 
         $attendance = $query->get();
 
-        $sectionAttendance = [];
-        foreach ($sections as $sectionId) {
+        $overview = [];
+        foreach ($attendance->groupBy('section_id') as $sectionId => $sectionAttendance) {
             $section = Section::find($sectionId);
-            $sectionRecords = $attendance->where('section_id', $sectionId);
+            $totalRecords = $sectionAttendance->count();
+            $presentRecords = $sectionAttendance->where('status', 'present')->count();
             
-            $totalDays = $sectionRecords->count();
-            $presentDays = $sectionRecords->where('status', 'present')->count();
-            $percentage = $totalDays > 0 ? ($presentDays / $totalDays) * 100 : 0;
-
-            $sectionAttendance[] = [
-                'section_name' => $section->name,
-                'total_days' => $totalDays,
-                'present_days' => $presentDays,
-                'percentage' => round($percentage, 2)
+            $overview[] = [
+                'section' => $section->name,
+                'total_records' => $totalRecords,
+                'present_records' => $presentRecords,
+                'attendance_rate' => $totalRecords > 0 ? round(($presentRecords / $totalRecords) * 100, 2) : 0
             ];
         }
 
-        return $sectionAttendance;
+        return $overview;
     }
 
     /**
@@ -347,26 +335,77 @@ class AcademicAnalyticsService
     {
         $query = Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
             $q->where('teacher_id', $teacherId);
-        })->with(['component']);
+        })->with('component');
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
 
         $grades = $query->get();
 
-        $assessmentBreakdown = [];
+        $breakdown = [];
         foreach ($grades->groupBy('component_id') as $componentId => $componentGrades) {
             $component = $componentGrades->first()->component;
-            $averageScore = $componentGrades->avg('percentage');
-            
-            $assessmentBreakdown[] = [
+            $breakdown[] = [
                 'assessment_type' => $component->name,
-                'average_score' => round($averageScore, 2),
-                'assignments_count' => $componentGrades->count()
+                'count' => $componentGrades->count(),
+                'average_score' => round($componentGrades->avg('percentage'), 2),
+                'weight' => $component->weight ?? 0
             ];
         }
 
-        return $assessmentBreakdown;
+        return $breakdown;
+    }
+
+    /**
+     * Get teacher recent grades
+     */
+    private function getTeacherRecentGrades($teacherId)
+    {
+        return Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })
+        ->with(['student', 'subject'])
+        ->orderBy('created_at', 'desc')
+        ->take(10)
+        ->get()
+        ->map(function($grade) {
+            return [
+                'student_name' => $grade->student->first_name . ' ' . $grade->student->last_name,
+                'subject' => $grade->subject->subject_name,
+                'score' => $grade->percentage,
+                'date' => $grade->created_at->format('M d, Y')
+            ];
+        });
+    }
+
+    /**
+     * Get teacher class performance
+     */
+    private function getTeacherClassPerformance($teacherId, $academicYearId = null, $semesterId = null)
+    {
+        $query = Grade::whereHas('subject.teachers', function($q) use ($teacherId) {
+            $q->where('teacher_id', $teacherId);
+        })->with(['student.sections', 'subject']);
+
+        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
+        if ($semesterId) $query->where('semester_id', $semesterId);
+
+        $grades = $query->get();
+
+        $classPerformance = [];
+        foreach ($grades->groupBy('student.sections.first.id') as $sectionId => $sectionGrades) {
+            $section = Section::find($sectionId);
+            if (!$section) continue;
+
+            $classPerformance[] = [
+                'section' => $section->name,
+                'average_score' => round($sectionGrades->avg('percentage'), 2),
+                'students_count' => $sectionGrades->groupBy('student_id')->count(),
+                'assignments_count' => $sectionGrades->count()
+            ];
+        }
+
+        return $classPerformance;
     }
 
     /**
@@ -381,75 +420,73 @@ class AcademicAnalyticsService
 
         $grades = $query->get();
 
+        $totalStudents = Student::count();
+        $totalTeachers = Teacher::count();
+        $totalSubjects = Subject::count();
+
         return [
-            'total_students' => Student::count(),
-            'total_teachers' => Teacher::count(),
-            'total_subjects' => Subject::count(),
-            'total_sections' => Section::count(),
-            'average_gpa' => round($this->calculateOverallGPA($grades), 2),
-            'pass_rate' => round($this->calculatePassRate($grades), 2)
+            'total_students' => $totalStudents,
+            'total_teachers' => $totalTeachers,
+            'total_subjects' => $totalSubjects,
+            'average_score' => round($grades->avg('percentage'), 2),
+            'total_assignments' => $grades->count(),
+            'pass_rate' => $grades->count() > 0 ? round(($grades->where('percentage', '>=', 60)->count() / $grades->count()) * 100, 2) : 0
         ];
     }
 
     /**
-     * Get year level comparison
+     * Get GPA comparison
      */
-    private function getYearLevelComparison($academicYearId = null, $semesterId = null)
+    private function getGpaComparison($academicYearId = null, $semesterId = null)
     {
-        $sections = Section::all();
-        $yearLevelData = [];
+        $query = DB::table('student_gpa');
 
-        foreach ($sections->groupBy('grade_level') as $gradeLevel => $gradeSections) {
-            $sectionIds = $gradeSections->pluck('id');
-            
-            $query = Grade::whereHas('student.sections', function($q) use ($sectionIds) {
-                $q->whereIn('section_id', $sectionIds);
-            });
+        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
+        if ($semesterId) $query->where('semester_id', $semesterId);
 
-            if ($academicYearId) $query->where('academic_year_id', $academicYearId);
-            if ($semesterId) $query->where('semester_id', $semesterId);
+        $gpaData = $query->get();
 
-            $grades = $query->get();
-            $averageGPA = $this->calculateOverallGPA($grades);
-
-            $yearLevelData[] = [
-                'grade_level' => $gradeLevel,
-                'average_gpa' => round($averageGPA, 2),
-                'students_count' => $grades->groupBy('student_id')->count()
+        $comparison = [];
+        foreach ($gpaData->groupBy('grade_level') as $gradeLevel => $gradeGpas) {
+            $comparison[] = [
+                'grade_level' => 'Grade ' . $gradeLevel,
+                'average_gpa' => round($gradeGpas->avg('gpa'), 2),
+                'students_count' => $gradeGpas->count(),
+                'highest_gpa' => $gradeGpas->max('gpa'),
+                'lowest_gpa' => $gradeGpas->min('gpa')
             ];
         }
 
-        return $yearLevelData;
+        return $comparison;
     }
 
     /**
-     * Get section performance
+     * Get pass/fail rates
      */
-    private function getSectionPerformance($academicYearId = null, $semesterId = null)
+    private function getPassFailRates($academicYearId = null, $semesterId = null)
     {
-        $sections = Section::all();
-        $sectionData = [];
+        $query = Grade::query();
 
-        foreach ($sections as $section) {
-            $query = Grade::whereHas('student.sections', function($q) use ($section) {
-                $q->where('section_id', $section->id);
-            });
+        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
+        if ($semesterId) $query->where('semester_id', $semesterId);
 
-            if ($academicYearId) $query->where('academic_year_id', $academicYearId);
-            if ($semesterId) $query->where('semester_id', $semesterId);
+        $grades = $query->with('subject')->get();
 
-            $grades = $query->get();
-            $averageGPA = $this->calculateOverallGPA($grades);
+        $rates = [];
+        foreach ($grades->groupBy('subject_id') as $subjectId => $subjectGrades) {
+            $subject = $subjectGrades->first()->subject;
+            $totalGrades = $subjectGrades->count();
+            $passingGrades = $subjectGrades->where('percentage', '>=', 60)->count();
 
-            $sectionData[] = [
-                'section_name' => $section->name,
-                'grade_level' => $section->grade_level,
-                'average_gpa' => round($averageGPA, 2),
-                'students_count' => $grades->groupBy('student_id')->count()
+            $rates[] = [
+                'subject' => $subject->subject_name,
+                'pass_rate' => $totalGrades > 0 ? round(($passingGrades / $totalGrades) * 100, 2) : 0,
+                'fail_rate' => $totalGrades > 0 ? round((($totalGrades - $passingGrades) / $totalGrades) * 100, 2) : 0,
+                'total_students' => $totalGrades
             ];
         }
 
-        return $sectionData;
+        return $rates;
     }
 
     /**
@@ -465,52 +502,30 @@ class AcademicAnalyticsService
         $attendance = $query->get();
 
         $monthlyData = [];
-        for ($month = 1; $month <= 12; $month++) {
-            $monthAttendance = $attendance->filter(function($record) use ($month) {
-                return $record->date->month === $month;
-            });
+        foreach ($attendance as $record) {
+            // Ensure date is a Carbon instance
+            $date = $record->date instanceof Carbon ? $record->date : Carbon::parse($record->date);
+            $month = $date->format('Y-m');
+            if (!isset($monthlyData[$month])) {
+                $monthlyData[$month] = ['present' => 0, 'total' => 0];
+            }
+            $monthlyData[$month]['total']++;
+            if ($record->status === 'present') {
+                $monthlyData[$month]['present']++;
+            }
+        }
 
-            $totalDays = $monthAttendance->count();
-            $presentDays = $monthAttendance->where('status', 'present')->count();
-            $percentage = $totalDays > 0 ? ($presentDays / $totalDays) * 100 : 0;
-
-            $monthlyData[] = [
-                'month' => date('F', mktime(0, 0, 0, $month, 1)),
-                'total_days' => $totalDays,
-                'present_days' => $presentDays,
-                'percentage' => round($percentage, 2)
+        $summary = [];
+        foreach ($monthlyData as $month => $data) {
+            $summary[] = [
+                'month' => Carbon::createFromFormat('Y-m', $month)->format('M Y'),
+                'attendance_rate' => round(($data['present'] / $data['total']) * 100, 2),
+                'present' => $data['present'],
+                'total' => $data['total']
             ];
         }
 
-        return [
-            'monthly_data' => $monthlyData,
-            'overall_percentage' => $this->calculateOverallAttendancePercentage($attendance)
-        ];
-    }
-
-    /**
-     * Get pass/fail rates
-     */
-    private function getPassFailRates($academicYearId = null, $semesterId = null)
-    {
-        $query = Grade::query();
-
-        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
-        if ($semesterId) $query->where('semester_id', $semesterId);
-
-        $grades = $query->get();
-
-        $totalGrades = $grades->count();
-        $passingGrades = $grades->where('percentage', '>=', 75)->count();
-        $failingGrades = $totalGrades - $passingGrades;
-
-        return [
-            'pass_rate' => $totalGrades > 0 ? round(($passingGrades / $totalGrades) * 100, 2) : 0,
-            'fail_rate' => $totalGrades > 0 ? round(($failingGrades / $totalGrades) * 100, 2) : 0,
-            'total_grades' => $totalGrades,
-            'passing_grades' => $passingGrades,
-            'failing_grades' => $failingGrades
-        ];
+        return $summary;
     }
 
     /**
@@ -518,120 +533,64 @@ class AcademicAnalyticsService
      */
     private function getSchoolSubjectPerformance($academicYearId = null, $semesterId = null)
     {
-        $query = Grade::with(['subject']);
+        $query = Grade::query();
 
         if ($academicYearId) $query->where('academic_year_id', $academicYearId);
         if ($semesterId) $query->where('semester_id', $semesterId);
 
-        $grades = $query->get();
+        $grades = $query->with('subject')->get();
 
-        $subjectPerformance = [];
+        $performance = [];
         foreach ($grades->groupBy('subject_id') as $subjectId => $subjectGrades) {
             $subject = $subjectGrades->first()->subject;
-            $averageScore = $subjectGrades->avg('percentage');
-            
-            $subjectPerformance[] = [
-                'subject_name' => $subject->subject_name,
-                'average_score' => round($averageScore, 2),
+            $performance[] = [
+                'subject' => $subject->subject_name,
+                'average_score' => round($subjectGrades->avg('percentage'), 2),
                 'students_count' => $subjectGrades->groupBy('student_id')->count(),
                 'assignments_count' => $subjectGrades->count()
             ];
         }
 
-        return $subjectPerformance;
+        return $performance;
     }
 
     /**
-     * Helper methods
+     * Get section comparison
      */
-    private function calculateOverallAttendancePercentage($attendance)
+    private function getSectionComparison($academicYearId = null, $semesterId = null)
     {
-        $totalDays = $attendance->count();
-        $presentDays = $attendance->where('status', 'present')->count();
-        
-        return $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0;
-    }
+        $query = Grade::query();
 
-    private function getPerformanceLevel($score)
-    {
-        if ($score >= 90) return 'Excellent';
-        if ($score >= 80) return 'Good';
-        if ($score >= 70) return 'Average';
-        if ($score >= 60) return 'Below Average';
-        return 'Poor';
-    }
+        if ($academicYearId) $query->where('academic_year_id', $academicYearId);
+        if ($semesterId) $query->where('semester_id', $semesterId);
 
-    private function calculateGPA($grades)
-    {
-        if ($grades->isEmpty()) return 0;
-        
-        $totalPoints = 0;
-        $totalCredits = 0;
-        
-        foreach ($grades as $grade) {
-            $points = $this->getGradePoints($grade->percentage);
-            $totalPoints += $points;
-            $totalCredits += 1; // Assuming 1 credit per assignment
-        }
-        
-        return $totalCredits > 0 ? $totalPoints / $totalCredits : 0;
-    }
+        $grades = $query->with(['student.sections'])->get();
 
-    private function getGradePoints($percentage)
-    {
-        if ($percentage >= 90) return 4.0;
-        if ($percentage >= 85) return 3.5;
-        if ($percentage >= 80) return 3.0;
-        if ($percentage >= 75) return 2.5;
-        if ($percentage >= 70) return 2.0;
-        if ($percentage >= 65) return 1.5;
-        if ($percentage >= 60) return 1.0;
-        return 0.0;
-    }
+        $comparison = [];
+        foreach ($grades->groupBy('student.sections.first.id') as $sectionId => $sectionGrades) {
+            $section = Section::find($sectionId);
+            if (!$section) continue;
 
-    private function calculateOverallGPA($grades)
-    {
-        return $this->calculateGPA($grades);
-    }
-
-    private function calculatePassRate($grades)
-    {
-        if ($grades->isEmpty()) return 0;
-        
-        $passingGrades = $grades->where('percentage', '>=', 75)->count();
-        return ($passingGrades / $grades->count()) * 100;
-    }
-
-    private function generateStudentAlerts($grades, $studentId)
-    {
-        $alerts = [];
-        
-        $lowGrades = $grades->where('percentage', '<', 75);
-        if ($lowGrades->count() >= 3) {
-            $alerts[] = [
-                'type' => 'warning',
-                'message' => 'Multiple low grades detected. Consider seeking academic support.'
+            $comparison[] = [
+                'section' => $section->name,
+                'average_score' => round($sectionGrades->avg('percentage'), 2),
+                'students_count' => $sectionGrades->groupBy('student_id')->count(),
+                'assignments_count' => $sectionGrades->count()
             ];
         }
-        
-        $recentLowGrades = $grades->where('percentage', '<', 75)
-            ->where('created_at', '>=', Carbon::now()->subDays(30));
-        if ($recentLowGrades->count() > 0) {
-            $alerts[] = [
-                'type' => 'danger',
-                'message' => 'Recent low grades detected. Immediate attention required.'
-            ];
-        }
-        
-        return $alerts;
+
+        return $comparison;
     }
 
-    private function getStudentRecentActivities($studentId)
+    /**
+     * Get performance level
+     */
+    private function getPerformanceLevel($averageScore)
     {
-        return ActivitySubmission::where('student_id', $studentId)
-            ->with(['activity.lesson'])
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        if ($averageScore >= 90) return 'Excellent';
+        if ($averageScore >= 80) return 'Good';
+        if ($averageScore >= 70) return 'Average';
+        if ($averageScore >= 60) return 'Below Average';
+        return 'Needs Improvement';
     }
 } 

@@ -305,24 +305,6 @@ Route::group(['middleware' => ['role:Parent']], function () {
     // Place parent-only routes here
 });
 
-// ----------------------- Analytics Dashboard Routes -----------------------------//
-Route::group(['prefix' => 'analytics'], function () {
-    // Student Analytics
-    Route::get('/student-dashboard', [App\Http\Controllers\AnalyticsController::class, 'studentDashboard'])->name('analytics.student-dashboard');
-    
-    // Teacher Analytics
-    Route::get('/teacher-dashboard', [App\Http\Controllers\AnalyticsController::class, 'teacherDashboard'])->name('analytics.teacher-dashboard');
-    
-    // Admin Analytics
-    Route::get('/admin-dashboard', [App\Http\Controllers\AnalyticsController::class, 'adminDashboard'])->name('analytics.admin-dashboard');
-    
-    // API endpoints for chart data
-    Route::get('/chart-data', [App\Http\Controllers\AnalyticsController::class, 'getChartData'])->name('analytics.chart-data');
-    
-    // Export reports
-    Route::get('/export', [App\Http\Controllers\AnalyticsController::class, 'exportReport'])->name('analytics.export');
-});
-
 Route::get('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachersForm'])->name('subjects.assignTeachersForm');
 Route::post('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachers'])->name('subjects.assignTeachers');
 Route::get('sections/{id}/assign-students', [SectionController::class, 'assignStudentsForm'])->name('sections.assignStudentsForm');
@@ -338,4 +320,47 @@ Route::get('api/sections/{section}/subjects', function(App\Models\Section $secti
         ->unique('id')
         ->values();
 })->name('api.section.subjects');
+
+// Analytics Routes
+Route::group(['prefix' => 'analytics'], function () {
+    // Student Analytics
+    Route::get('/student-dashboard', [App\Http\Controllers\AnalyticsController::class, 'studentDashboard'])->name('analytics.student-dashboard');
+    
+    // Teacher Analytics
+    Route::get('/teacher-dashboard', [App\Http\Controllers\AnalyticsController::class, 'teacherDashboard'])->name('analytics.teacher-dashboard');
+    
+    // Admin Analytics
+    Route::get('/admin-dashboard', [App\Http\Controllers\AnalyticsController::class, 'adminDashboard'])->name('analytics.admin-dashboard');
+    
+    // API endpoints for chart data
+    Route::get('/chart-data', [App\Http\Controllers\AnalyticsController::class, 'getChartData'])->name('analytics.chart-data');
+    
+    // Export reports
+    Route::get('/export-report', [App\Http\Controllers\AnalyticsController::class, 'exportReport'])->name('analytics.export-report');
+    
+    // Detail views (for teachers/admins viewing specific students/teachers)
+    Route::get('/student/{studentId}', [App\Http\Controllers\AnalyticsController::class, 'getStudentAnalytics'])->name('analytics.student-detail');
+    Route::get('/teacher/{teacherId}', [App\Http\Controllers\AnalyticsController::class, 'getTeacherAnalytics'])->name('analytics.teacher-detail');
+});
+
+// Calendar Routes
+Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], function () {
+    Route::get('/', [App\Http\Controllers\CalendarEventController::class, 'index'])->name('calendar.index');
+    Route::get('/create', [App\Http\Controllers\CalendarEventController::class, 'create'])->name('calendar.create');
+    Route::post('/', [App\Http\Controllers\CalendarEventController::class, 'store'])->name('calendar.store');
+    Route::get('/{calendarEvent}', [App\Http\Controllers\CalendarEventController::class, 'show'])->name('calendar.show');
+    Route::get('/{calendarEvent}/edit', [App\Http\Controllers\CalendarEventController::class, 'edit'])->name('calendar.edit');
+    Route::put('/{calendarEvent}', [App\Http\Controllers\CalendarEventController::class, 'update'])->name('calendar.update');
+    Route::delete('/{calendarEvent}', [App\Http\Controllers\CalendarEventController::class, 'destroy'])->name('calendar.destroy');
+    
+    // API endpoints for calendar functionality
+    Route::get('/available-slots', [App\Http\Controllers\CalendarEventController::class, 'getAvailableSlots'])->name('calendar.available-slots');
+    Route::get('/check-conflicts', [App\Http\Controllers\CalendarEventController::class, 'checkConflicts'])->name('calendar.check-conflicts');
+});
+
+// Schedule Routes
+Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teacher']], function () {
+    Route::get('/', [App\Http\Controllers\ClassScheduleController::class, 'index'])->name('schedule.index');
+    Route::get('/dashboard-data', [App\Http\Controllers\ClassScheduleController::class, 'getDashboardSchedule'])->name('schedule.dashboard-data');
+});
 

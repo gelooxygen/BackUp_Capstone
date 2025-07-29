@@ -28,7 +28,7 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="form-group">
                             <select class="form-control" id="academic_year_filter" name="academic_year_id">
-                                <option value="">Select Academic Year</option>
+                                <option value="">All Academic Years</option>
                                 @foreach($academicYears as $year)
                                     <option value="{{ $year->id }}" {{ $academicYearId == $year->id ? 'selected' : '' }}>
                                         {{ $year->name }}
@@ -40,7 +40,7 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="form-group">
                             <select class="form-control" id="semester_filter" name="semester_id">
-                                <option value="">Select Semester</option>
+                                <option value="">All Semesters</option>
                                 @foreach($semesters as $semester)
                                     <option value="{{ $semester->id }}" {{ $semesterId == $semester->id ? 'selected' : '' }}>
                                         {{ $semester->name }}
@@ -51,8 +51,8 @@
                     </div>
                     <div class="col-lg-4 col-md-6">
                         <div class="search-student-btn">
-                            <button type="button" class="btn btn-primary" onclick="updateAnalytics()">
-                                <i class="fas fa-chart-line"></i> Update Analytics
+                            <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                                <i class="fas fa-filter"></i> Apply Filters
                             </button>
                         </div>
                     </div>
@@ -92,12 +92,12 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="card bg-info text-white">
+                    <div class="card bg-warning text-white">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h4 class="mb-0">{{ $analytics['school_overview']['average_gpa'] }}</h4>
-                                    <p class="mb-0">Average GPA</p>
+                                    <h4 class="mb-0">{{ $analytics['school_overview']['average_score'] }}%</h4>
+                                    <p class="mb-0">Average Score</p>
                                 </div>
                                 <div class="align-self-center">
                                     <i class="fas fa-chart-line fa-2x"></i>
@@ -107,7 +107,7 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <div class="card bg-warning text-white">
+                    <div class="card bg-info text-white">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
@@ -115,65 +115,7 @@
                                     <p class="mb-0">Pass Rate</p>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-check-circle fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pass/Fail Summary -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">Pass/Fail Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <h3 class="text-success">{{ $analytics['pass_fail_rates']['pass_rate'] }}%</h3>
-                                        <p>Pass Rate</p>
-                                        <small class="text-muted">{{ $analytics['pass_fail_rates']['passing_grades'] }} students</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="stat-item">
-                                        <h3 class="text-danger">{{ $analytics['pass_fail_rates']['fail_rate'] }}%</h3>
-                                        <p>Fail Rate</p>
-                                        <small class="text-muted">{{ $analytics['pass_fail_rates']['failing_grades'] }} students</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title">School Statistics</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <p><strong>Total Subjects:</strong> {{ $analytics['school_overview']['total_subjects'] }}</p>
-                                    <p><strong>Total Sections:</strong> {{ $analytics['school_overview']['total_sections'] }}</p>
-                                </div>
-                                <div class="col-6">
-                                    <p><strong>Total Grades:</strong> {{ $analytics['pass_fail_rates']['total_grades'] }}</p>
-                                    <p><strong>Overall Performance:</strong> 
-                                        @if($analytics['school_overview']['average_gpa'] >= 3.5)
-                                            <span class="badge bg-success">Excellent</span>
-                                        @elseif($analytics['school_overview']['average_gpa'] >= 3.0)
-                                            <span class="badge bg-primary">Good</span>
-                                        @elseif($analytics['school_overview']['average_gpa'] >= 2.5)
-                                            <span class="badge bg-warning">Average</span>
-                                        @else
-                                            <span class="badge bg-danger">Needs Improvement</span>
-                                        @endif
-                                    </p>
+                                    <i class="fas fa-graduation-cap fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -186,20 +128,20 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">Year Level GPA Comparison</h5>
+                            <h5 class="card-title">GPA Comparison by Grade Level</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="yearLevelChart" height="200"></canvas>
+                            <canvas id="gpaComparisonChart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">Section Performance</h5>
+                            <h5 class="card-title">Pass/Fail Rates by Subject</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="sectionPerformanceChart" height="200"></canvas>
+                            <canvas id="passFailRatesChart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
@@ -210,16 +152,6 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="card-title">School Attendance Summary</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="schoolAttendanceChart" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
                             <h5 class="card-title">Subject Performance Overview</h5>
                         </div>
                         <div class="card-body">
@@ -227,77 +159,136 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Year Level Comparison Table -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card card-table">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">School Attendance Summary</h5>
+                        </div>
                         <div class="card-body">
-                            <div class="page-header">
-                                <div class="row align-items-center">
-                                    <div class="col">
-                                        <h3 class="page-title">Year Level Performance Details</h3>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive">
-                                <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
-                                    <thead class="student-thread">
-                                        <tr>
-                                            <th>Grade Level</th>
-                                            <th>Average GPA</th>
-                                            <th>Students Count</th>
-                                            <th>Performance Level</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($analytics['year_level_comparison'] as $year)
-                                            <tr>
-                                                <td>
-                                                    <h2 class="table-avatar">
-                                                        <a>Grade {{ $year['grade_level'] }}</a>
-                                                    </h2>
-                                                </td>
-                                                <td>
-                                                    <strong>{{ $year['average_gpa'] }}</strong>
-                                                </td>
-                                                <td>{{ $year['students_count'] }}</td>
-                                                <td>
-                                                    @if($year['average_gpa'] >= 3.5)
-                                                        Excellent
-                                                    @elseif($year['average_gpa'] >= 3.0)
-                                                        Good
-                                                    @elseif($year['average_gpa'] >= 2.5)
-                                                        Average
-                                                    @else
-                                                        Needs Improvement
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($year['average_gpa'] >= 3.5)
-                                                        <span class="badge bg-success">Excellent</span>
-                                                    @elseif($year['average_gpa'] >= 3.0)
-                                                        <span class="badge bg-primary">Good</span>
-                                                    @elseif($year['average_gpa'] >= 2.5)
-                                                        <span class="badge bg-warning">Average</span>
-                                                    @else
-                                                        <span class="badge bg-danger">Needs Improvement</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                            <canvas id="attendanceSummaryChart" height="200"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section Performance Table -->
+            <!-- Section Comparison -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Section Performance Comparison</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="sectionComparisonChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Tables -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card card-table">
+                        <div class="card-body">
+                            <div class="page-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h3 class="page-title">Subject Performance Details</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if(count($analytics['subject_performance']) > 0)
+                                <div class="table-responsive">
+                                    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+                                        <thead class="student-thread">
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th>Average Score</th>
+                                                <th>Students</th>
+                                                <th>Assignments</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($analytics['subject_performance'] as $subject)
+                                                <tr>
+                                                    <td>
+                                                        <h2 class="table-avatar">
+                                                            <a>{{ $subject['subject'] }}</a>
+                                                        </h2>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ $subject['average_score'] }}%</strong>
+                                                    </td>
+                                                    <td>{{ $subject['students_count'] }}</td>
+                                                    <td>{{ $subject['assignments_count'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-3">
+                                    <p class="text-muted">No subject performance data available.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card card-table">
+                        <div class="card-body">
+                            <div class="page-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h3 class="page-title">Pass/Fail Analysis</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if(count($analytics['pass_fail_rates']) > 0)
+                                <div class="table-responsive">
+                                    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+                                        <thead class="student-thread">
+                                            <tr>
+                                                <th>Subject</th>
+                                                <th>Pass Rate</th>
+                                                <th>Fail Rate</th>
+                                                <th>Total Students</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($analytics['pass_fail_rates'] as $rate)
+                                                <tr>
+                                                    <td>
+                                                        <h2 class="table-avatar">
+                                                            <a>{{ $rate['subject'] }}</a>
+                                                        </h2>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success">{{ $rate['pass_rate'] }}%</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-danger">{{ $rate['fail_rate'] }}%</span>
+                                                    </td>
+                                                    <td>{{ $rate['total_students'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-3">
+                                    <p class="text-muted">No pass/fail data available.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPA Comparison Table -->
             <div class="row">
                 <div class="col-12">
                     <div class="card card-table">
@@ -305,63 +296,65 @@
                             <div class="page-header">
                                 <div class="row align-items-center">
                                     <div class="col">
-                                        <h3 class="page-title">Section Performance Details</h3>
+                                        <h3 class="page-title">GPA Analysis by Grade Level</h3>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="table-responsive">
-                                <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
-                                    <thead class="student-thread">
-                                        <tr>
-                                            <th>Section</th>
-                                            <th>Grade Level</th>
-                                            <th>Average GPA</th>
-                                            <th>Students Count</th>
-                                            <th>Performance Level</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($analytics['section_performance'] as $section)
+                            @if(count($analytics['gpa_comparison']) > 0)
+                                <div class="table-responsive">
+                                    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+                                        <thead class="student-thread">
                                             <tr>
-                                                <td>
-                                                    <h2 class="table-avatar">
-                                                        <a>{{ $section['section_name'] }}</a>
-                                                    </h2>
-                                                </td>
-                                                <td>{{ $section['grade_level'] }}</td>
-                                                <td>
-                                                    <strong>{{ $section['average_gpa'] }}</strong>
-                                                </td>
-                                                <td>{{ $section['students_count'] }}</td>
-                                                <td>
-                                                    @if($section['average_gpa'] >= 3.5)
-                                                        Excellent
-                                                    @elseif($section['average_gpa'] >= 3.0)
-                                                        Good
-                                                    @elseif($section['average_gpa'] >= 2.5)
-                                                        Average
-                                                    @else
-                                                        Needs Improvement
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if($section['average_gpa'] >= 3.5)
-                                                        <span class="badge bg-success">Excellent</span>
-                                                    @elseif($section['average_gpa'] >= 3.0)
-                                                        <span class="badge bg-primary">Good</span>
-                                                    @elseif($section['average_gpa'] >= 2.5)
-                                                        <span class="badge bg-warning">Average</span>
-                                                    @else
-                                                        <span class="badge bg-danger">Needs Improvement</span>
-                                                    @endif
-                                                </td>
+                                                <th>Grade Level</th>
+                                                <th>Average GPA</th>
+                                                <th>Students</th>
+                                                <th>Highest GPA</th>
+                                                <th>Lowest GPA</th>
+                                                <th>Performance</th>
                                             </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($analytics['gpa_comparison'] as $gpa)
+                                                <tr>
+                                                    <td>
+                                                        <h2 class="table-avatar">
+                                                            <a>{{ $gpa['grade_level'] }}</a>
+                                                        </h2>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ $gpa['average_gpa'] }}</strong>
+                                                    </td>
+                                                    <td>{{ $gpa['students_count'] }}</td>
+                                                    <td>
+                                                        <span class="badge bg-success">{{ $gpa['highest_gpa'] }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-danger">{{ $gpa['lowest_gpa'] }}</span>
+                                                    </td>
+                                                    <td>
+                                                        @if($gpa['average_gpa'] >= 3.5)
+                                                            <span class="badge bg-success">Excellent</span>
+                                                        @elseif($gpa['average_gpa'] >= 3.0)
+                                                            <span class="badge bg-primary">Good</span>
+                                                        @elseif($gpa['average_gpa'] >= 2.5)
+                                                            <span class="badge bg-warning">Average</span>
+                                                        @else
+                                                            <span class="badge bg-danger">Needs Improvement</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-5">
+                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No GPA Data</h5>
+                                    <p class="text-muted">No GPA data has been calculated yet.</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -380,12 +373,12 @@
         background-color: #7bb13c !important;
     }
     
-    .card.bg-info {
-        background-color: #17a2b8 !important;
-    }
-    
     .card.bg-warning {
         background-color: #ffc107 !important;
+    }
+    
+    .card.bg-info {
+        background-color: #17a2b8 !important;
     }
     
     .badge.bg-success {
@@ -405,18 +398,10 @@
         background-color: #dc3545 !important;
     }
     
-    .stat-item h3 {
-        margin: 0;
-        font-weight: 600;
-    }
-    
-    .stat-item p {
-        margin: 5px 0;
+    .table-avatar h2 a {
+        color: #333;
         font-weight: 500;
-    }
-    
-    .stat-item small {
-        font-size: 0.875rem;
+        text-decoration: none;
     }
 </style>
 @endpush
@@ -424,9 +409,193 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let yearLevelChart, sectionPerformanceChart, schoolAttendanceChart, subjectPerformanceChart;
+let gpaComparisonChart, passFailRatesChart, subjectPerformanceChart, attendanceSummaryChart, sectionComparisonChart;
 
-function updateAnalytics() {
+$(document).ready(function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    // GPA Comparison Chart
+    const gpaCtx = document.getElementById('gpaComparisonChart').getContext('2d');
+    gpaComparisonChart = new Chart(gpaCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(collect($analytics['gpa_comparison'])->pluck('grade_level')) !!},
+            datasets: [{
+                label: 'Average GPA',
+                data: {!! json_encode(collect($analytics['gpa_comparison'])->pluck('average_gpa')) !!},
+                backgroundColor: [
+                    '#3d5ee1',
+                    '#7bb13c',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 4.0
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Pass/Fail Rates Chart
+    const passFailCtx = document.getElementById('passFailRatesChart').getContext('2d');
+    passFailRatesChart = new Chart(passFailCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(collect($analytics['pass_fail_rates'])->pluck('subject')) !!},
+            datasets: [{
+                label: 'Pass Rate (%)',
+                data: {!! json_encode(collect($analytics['pass_fail_rates'])->pluck('pass_rate')) !!},
+                backgroundColor: '#7bb13c',
+                borderWidth: 1
+            }, {
+                label: 'Fail Rate (%)',
+                data: {!! json_encode(collect($analytics['pass_fail_rates'])->pluck('fail_rate')) !!},
+                backgroundColor: '#dc3545',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+
+    // Subject Performance Chart
+    const subjectCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+    subjectPerformanceChart = new Chart(subjectCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(collect($analytics['subject_performance'])->pluck('subject')) !!},
+            datasets: [{
+                label: 'Average Score (%)',
+                data: {!! json_encode(collect($analytics['subject_performance'])->pluck('average_score')) !!},
+                backgroundColor: [
+                    '#3d5ee1',
+                    '#7bb13c',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Attendance Summary Chart
+    const attendanceCtx = document.getElementById('attendanceSummaryChart').getContext('2d');
+    attendanceSummaryChart = new Chart(attendanceCtx, {
+        type: 'line',
+        data: {
+            labels: {!! json_encode(collect($analytics['attendance_summary'])->pluck('month')) !!},
+            datasets: [{
+                label: 'Attendance Rate (%)',
+                data: {!! json_encode(collect($analytics['attendance_summary'])->pluck('attendance_rate')) !!},
+                borderColor: '#3d5ee1',
+                backgroundColor: 'rgba(61, 94, 225, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Section Comparison Chart
+    const sectionCtx = document.getElementById('sectionComparisonChart').getContext('2d');
+    sectionComparisonChart = new Chart(sectionCtx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode(collect($analytics['section_comparison'])->pluck('section')) !!},
+            datasets: [{
+                label: 'Average Score (%)',
+                data: {!! json_encode(collect($analytics['section_comparison'])->pluck('average_score')) !!},
+                backgroundColor: [
+                    '#3d5ee1',
+                    '#7bb13c',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+
+function applyFilters() {
     const academicYear = $('#academic_year_filter').val();
     const semester = $('#semester_filter').val();
     
@@ -449,138 +618,7 @@ function exportReport() {
     if (semester) params.append('semester_id', semester);
     
     // Download report
-    window.location.href = '{{ route("analytics.export") }}?' + params.toString();
+    window.location.href = '{{ route("analytics.export-report") }}?' + params.toString();
 }
-
-$(document).ready(function() {
-    // Year Level Chart
-    const yearCtx = document.getElementById('yearLevelChart').getContext('2d');
-    yearLevelChart = new Chart(yearCtx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode(collect($analytics['year_level_comparison'])->pluck('grade_level')->map(function($level) { return 'Grade ' . $level; })) !!},
-            datasets: [{
-                label: 'Average GPA',
-                data: {!! json_encode(collect($analytics['year_level_comparison'])->pluck('average_gpa')) !!},
-                backgroundColor: [
-                    '#3d5ee1',
-                    '#7bb13c',
-                    '#ffc107',
-                    '#dc3545',
-                    '#17a2b8',
-                    '#6c757d'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 4.0
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // Section Performance Chart
-    const sectionCtx = document.getElementById('sectionPerformanceChart').getContext('2d');
-    sectionPerformanceChart = new Chart(sectionCtx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode(collect($analytics['section_performance'])->pluck('section_name')) !!},
-            datasets: [{
-                label: 'Average GPA',
-                data: {!! json_encode(collect($analytics['section_performance'])->pluck('average_gpa')) !!},
-                backgroundColor: '#17a2b8',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 4.0
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // School Attendance Chart
-    const attendanceCtx = document.getElementById('schoolAttendanceChart').getContext('2d');
-    schoolAttendanceChart = new Chart(attendanceCtx, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode(collect($analytics['attendance_summary']['monthly_data'])->pluck('month')) !!},
-            datasets: [{
-                label: 'Attendance (%)',
-                data: {!! json_encode(collect($analytics['attendance_summary']['monthly_data'])->pluck('percentage')) !!},
-                borderColor: '#7bb13c',
-                backgroundColor: 'rgba(123, 177, 60, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-
-    // Subject Performance Chart
-    const subjectCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
-    subjectPerformanceChart = new Chart(subjectCtx, {
-        type: 'doughnut',
-        data: {
-            labels: {!! json_encode(collect($analytics['subject_performance'])->pluck('subject_name')) !!},
-            datasets: [{
-                data: {!! json_encode(collect($analytics['subject_performance'])->pluck('average_score')) !!},
-                backgroundColor: [
-                    '#3d5ee1',
-                    '#7bb13c',
-                    '#ffc107',
-                    '#dc3545',
-                    '#17a2b8',
-                    '#6c757d'
-                ],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-});
 </script>
 @endpush 

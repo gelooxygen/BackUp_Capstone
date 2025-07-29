@@ -377,6 +377,81 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Weekly Schedule Widget -->
+            <div class="row mt-4">
+                <div class="col-12 col-lg-12 col-xl-8">
+                    @include('components.student-schedule-widget')
+                </div>
+                <div class="col-12 col-lg-12 col-xl-4">
+                    <div class="card flex-fill comman-shadow">
+                        <div class="card-header">
+                            <h5 class="card-title">Today's Classes</h5>
+                        </div>
+                        <div class="card-body">
+                            @php
+                                if (Auth::user()->role_name === 'Student') {
+                                    $student = Auth::user()->student;
+                                    if ($student) {
+                                        $todaySchedule = App\Models\ClassSchedule::getTodaySchedule($student->id);
+                                    } else {
+                                        $todaySchedule = collect();
+                                    }
+                                } else {
+                                    $todaySchedule = collect();
+                                }
+                            @endphp
+
+                            @if($todaySchedule->count() > 0)
+                                <div class="today-classes">
+                                    @foreach($todaySchedule as $schedule)
+                                        <div class="class-item mb-3 p-3 border rounded">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="class-info">
+                                                    <h6 class="mb-1">
+                                                        <span class="badge" style="background-color: {{ $schedule->subject_color }}; color: white;">
+                                                            {{ $schedule->subject->subject_name }}
+                                                        </span>
+                                                    </h6>
+                                                    <p class="mb-1"><strong>{{ $schedule->time_range }}</strong></p>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-user"></i> {{ $schedule->teacher->full_name }} |
+                                                        <i class="fas fa-door-open"></i> {{ $schedule->room ? $schedule->room->room_name : 'TBD' }}
+                                                    </small>
+                                                </div>
+                                                <div class="class-status">
+                                                    @php
+                                                        $now = Carbon\Carbon::now();
+                                                        $startTime = Carbon\Carbon::parse($schedule->start_time);
+                                                        $endTime = Carbon\Carbon::parse($schedule->end_time);
+                                                        $today = Carbon\Carbon::today();
+                                                        $scheduleStart = $today->copy()->setTimeFrom($startTime);
+                                                        $scheduleEnd = $today->copy()->setTimeFrom($endTime);
+                                                    @endphp
+                                                    
+                                                    @if($now < $scheduleStart)
+                                                        <span class="badge bg-info">Upcoming</span>
+                                                    @elseif($now >= $scheduleStart && $now <= $scheduleEnd)
+                                                        <span class="badge bg-success">In Progress</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Completed</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-4">
+                                    <i class="fas fa-calendar-check fa-2x text-success mb-3"></i>
+                                    <h6>No Classes Today!</h6>
+                                    <p class="text-muted small">Enjoy your free time or catch up on studies.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
