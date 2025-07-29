@@ -152,6 +152,7 @@ class GradingController extends Controller
         $semesterId = $request->get('semester_id');
 
         $students = Student::all();
+        $subjects = Subject::all();
         $academicYears = AcademicYear::all();
         $semesters = Semester::all();
 
@@ -167,7 +168,7 @@ class GradingController extends Controller
         }
 
         return view('grading.performance-analytics', compact(
-            'students', 'academicYears', 'semesters', 'performanceData', 'trendData', 'alerts',
+            'students', 'subjects', 'academicYears', 'semesters', 'performanceData', 'trendData', 'alerts',
             'studentId', 'academicYearId', 'semesterId'
         ));
     }
@@ -281,12 +282,14 @@ class GradingController extends Controller
     // Grade Alerts Management
     public function gradeAlerts(Request $request)
     {
+        $students = Student::all();
+        
         $alerts = GradeAlert::with(['student', 'subject', 'academicYear', 'semester'])
             ->where('is_resolved', false)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('grading.grade-alerts', compact('alerts'));
+        return view('grading.grade-alerts', compact('alerts', 'students'));
     }
 
     // Resolve Alert

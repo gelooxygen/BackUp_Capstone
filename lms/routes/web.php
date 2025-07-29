@@ -240,6 +240,59 @@ Route::group(['middleware' => ['role:Teacher']], function () {
         Route::get('export-grades', [App\Http\Controllers\GradingController::class, 'exportGrades'])->name('teacher.grading.export-grades');
         Route::get('export-gpa', [App\Http\Controllers\GradingController::class, 'exportGpa'])->name('teacher.grading.export-gpa');
     });
+
+    // ----------------------- Lesson Planner Module Routes (Teacher Only) -----------------------------//
+    Route::group(['prefix' => 'lessons'], function () {
+        // Lesson Management
+        Route::get('/', [App\Http\Controllers\LessonController::class, 'index'])->name('lessons.index');
+        Route::get('/create', [App\Http\Controllers\LessonController::class, 'create'])->name('lessons.create');
+        Route::post('/', [App\Http\Controllers\LessonController::class, 'store'])->name('lessons.store');
+        Route::get('/{lesson}', [App\Http\Controllers\LessonController::class, 'show'])->name('lessons.show');
+        Route::get('/{lesson}/edit', [App\Http\Controllers\LessonController::class, 'edit'])->name('lessons.edit');
+        Route::put('/{lesson}', [App\Http\Controllers\LessonController::class, 'update'])->name('lessons.update');
+        Route::delete('/{lesson}', [App\Http\Controllers\LessonController::class, 'destroy'])->name('lessons.destroy');
+        
+        // Lesson Status Management
+        Route::post('/{lesson}/publish', [App\Http\Controllers\LessonController::class, 'publish'])->name('lessons.publish');
+        Route::post('/{lesson}/complete', [App\Http\Controllers\LessonController::class, 'complete'])->name('lessons.complete');
+        
+        // Activity Management
+        Route::get('/{lesson}/activities', [App\Http\Controllers\ActivityController::class, 'index'])->name('lessons.activities.index');
+        Route::get('/{lesson}/activities/create', [App\Http\Controllers\ActivityController::class, 'create'])->name('lessons.activities.create');
+        Route::post('/{lesson}/activities', [App\Http\Controllers\ActivityController::class, 'store'])->name('lessons.activities.store');
+        Route::get('/{lesson}/activities/{activity}', [App\Http\Controllers\ActivityController::class, 'show'])->name('lessons.activities.show');
+        Route::get('/{lesson}/activities/{activity}/edit', [App\Http\Controllers\ActivityController::class, 'edit'])->name('lessons.activities.edit');
+        Route::put('/{lesson}/activities/{activity}', [App\Http\Controllers\ActivityController::class, 'update'])->name('lessons.activities.update');
+        Route::delete('/{lesson}/activities/{activity}', [App\Http\Controllers\ActivityController::class, 'destroy'])->name('lessons.activities.destroy');
+        
+                        // Activity Rubric Management
+                Route::get('/{lesson}/activities/{activity}/rubric', [App\Http\Controllers\ActivityController::class, 'rubric'])->name('lessons.activities.rubric');
+                Route::post('/{lesson}/activities/{activity}/rubric', [App\Http\Controllers\ActivityController::class, 'storeRubric'])->name('lessons.activities.store-rubric');
+                Route::get('/{lesson}/activities/{activity}/rubric/{rubric}/edit', [App\Http\Controllers\ActivityController::class, 'editRubric'])->name('lessons.activities.edit-rubric');
+                Route::put('/{lesson}/activities/{activity}/rubric/{rubric}', [App\Http\Controllers\ActivityController::class, 'updateRubric'])->name('lessons.activities.update-rubric');
+                Route::delete('/{lesson}/activities/{activity}/rubric/{rubric}', [App\Http\Controllers\ActivityController::class, 'destroyRubric'])->name('lessons.activities.destroy-rubric');
+                
+                // Activity Submissions Management
+                Route::get('/{lesson}/activities/{activity}/submissions', [App\Http\Controllers\SubmissionController::class, 'index'])->name('lessons.activities.submissions');
+                Route::post('/{lesson}/activities/{activity}/submissions', [App\Http\Controllers\SubmissionController::class, 'store'])->name('lessons.activities.store-submission');
+                Route::get('/{lesson}/activities/{activity}/submissions/{submission}', [App\Http\Controllers\SubmissionController::class, 'show'])->name('lessons.activities.show-submission');
+                Route::delete('/{lesson}/activities/{activity}/submissions/{submission}', [App\Http\Controllers\SubmissionController::class, 'destroy'])->name('lessons.activities.destroy-submission');
+                
+                // Grading Management
+                Route::get('/{lesson}/activities/{activity}/submissions/{submission}/grade', [App\Http\Controllers\SubmissionController::class, 'gradeSubmission'])->name('lessons.activities.grade-submission');
+                Route::post('/{lesson}/activities/{activity}/submissions/{submission}/grade', [App\Http\Controllers\SubmissionController::class, 'storeGrade'])->name('lessons.activities.store-grade');
+                Route::get('/{lesson}/activities/{activity}/submissions/{submission}/grade/view', [App\Http\Controllers\SubmissionController::class, 'viewGrade'])->name('lessons.activities.view-grade');
+                Route::get('/{lesson}/activities/{activity}/submissions/{submission}/grade/edit', [App\Http\Controllers\SubmissionController::class, 'editGrade'])->name('lessons.activities.edit-grade');
+                Route::put('/{lesson}/activities/{activity}/submissions/{submission}/grade', [App\Http\Controllers\SubmissionController::class, 'updateGrade'])->name('lessons.activities.update-grade');
+                
+                // Export
+                Route::get('/{lesson}/activities/{activity}/submissions/export', [App\Http\Controllers\SubmissionController::class, 'exportSubmissions'])->name('lessons.activities.export-submissions');
+                
+                // Lesson Recommendations
+                Route::get('/recommendations/student-analysis', [App\Http\Controllers\LessonRecommendationController::class, 'studentAnalysis'])->name('lessons.recommendations.student-analysis');
+                Route::get('/recommendations/class-analysis', [App\Http\Controllers\LessonRecommendationController::class, 'classAnalysis'])->name('lessons.recommendations.class-analysis');
+                Route::get('/recommendations/export', [App\Http\Controllers\LessonRecommendationController::class, 'exportAnalysis'])->name('lessons.recommendations.export');
+    });
 });
 
 // Student-only routes
@@ -250,6 +303,24 @@ Route::group(['middleware' => ['role:Student']], function () {
 // Parent-only routes
 Route::group(['middleware' => ['role:Parent']], function () {
     // Place parent-only routes here
+});
+
+// ----------------------- Analytics Dashboard Routes -----------------------------//
+Route::group(['prefix' => 'analytics'], function () {
+    // Student Analytics
+    Route::get('/student-dashboard', [App\Http\Controllers\AnalyticsController::class, 'studentDashboard'])->name('analytics.student-dashboard');
+    
+    // Teacher Analytics
+    Route::get('/teacher-dashboard', [App\Http\Controllers\AnalyticsController::class, 'teacherDashboard'])->name('analytics.teacher-dashboard');
+    
+    // Admin Analytics
+    Route::get('/admin-dashboard', [App\Http\Controllers\AnalyticsController::class, 'adminDashboard'])->name('analytics.admin-dashboard');
+    
+    // API endpoints for chart data
+    Route::get('/chart-data', [App\Http\Controllers\AnalyticsController::class, 'getChartData'])->name('analytics.chart-data');
+    
+    // Export reports
+    Route::get('/export', [App\Http\Controllers\AnalyticsController::class, 'exportReport'])->name('analytics.export');
 });
 
 Route::get('subjects/{id}/assign-teachers', [SubjectController::class, 'assignTeachersForm'])->name('subjects.assignTeachersForm');

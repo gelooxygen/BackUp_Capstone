@@ -38,6 +38,7 @@
                     <li>
                         <a href="{{ route('curriculum.index') }}"><i class="fas fa-book"></i> <span>Curriculum Management</span></a>
                     </li>
+                    <li><a href="{{ route('analytics.admin-dashboard') }}"><i class="fas fa-chart-pie"></i> <span>School Analytics</span></a></li>
                 @endif
 
                 {{-- TEACHER SIDEBAR --}}
@@ -59,6 +60,16 @@
                             <li><a href="{{ route('teacher.grading.grade-alerts') }}"><i class="fas fa-exclamation-triangle"></i> <span>Grade Alerts</span></a></li>
                         </ul>
                     </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-book-open"></i> <span>Lesson Planner</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('lessons.index') }}"><i class="fas fa-list"></i> <span>My Lessons</span></a></li>
+                            <li><a href="{{ route('lessons.create') }}"><i class="fas fa-plus"></i> <span>Create Lesson</span></a></li>
+                            <li><a href="{{ route('lessons.recommendations.student-analysis') }}"><i class="fas fa-chart-line"></i> <span>Performance Analysis</span></a></li>
+                            <li><a href="{{ route('lessons.recommendations.class-analysis') }}"><i class="fas fa-users"></i> <span>Class Analysis</span></a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ route('analytics.teacher-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>Class Analytics</span></a></li>
                     <li><a href="#"><i class="fas fa-upload"></i> <span>Upload Lesson Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Class Announcements</span></a></li>
                     <li><a href="#"><i class="fas fa-user"></i> <span>Student Profiles</span></a></li>
@@ -74,6 +85,7 @@
                     <li><a href="#"><i class="fas fa-download"></i> <span>Learning Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
+                    <li><a href="{{ route('analytics.student-dashboard') }}"><i class="fas fa-chart-line"></i> <span>My Analytics</span></a></li>
                     <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
                 @endif
 

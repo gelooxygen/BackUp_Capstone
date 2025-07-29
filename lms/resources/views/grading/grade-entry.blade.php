@@ -1,477 +1,415 @@
 @extends('layouts.master')
-
 @section('content')
-<div class="container-fluid px-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-gradient-primary text-white border-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h4 class="mb-1 fw-bold">
-                                <i class="fas fa-edit me-2"></i>Grade Entry Form
-                            </h4>
-                            <p class="mb-0 opacity-75">Enter student grades for selected criteria</p>
+    {{-- message --}}
+    {!! Toastr::message() !!}
+    <div class="page-wrapper">
+        <div class="content container-fluid">
+
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h3 class="page-title">Grade Entry</h3>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Grade Entry</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="student-group-form">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="form-group">
+                            <select class="form-control" id="subject_id" name="subject_id">
+                                <option value="">Select Subject</option>
+                                @foreach($subjects as $subject)
+                                    <option value="{{ $subject->id }}">{{ $subject->subject_name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-cog me-1"></i>Actions
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ route('teacher.grading.gpa-ranking') }}">
-                                    <i class="fas fa-chart-bar me-2"></i>View GPA Ranking
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ route('teacher.grading.weight-settings') }}">
-                                    <i class="fas fa-cog me-2"></i>Weight Settings
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ route('teacher.grading.grade-alerts') }}">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>Grade Alerts
-                                </a></li>
-                            </ul>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="form-group">
+                            <select class="form-control" id="section_id" name="section_id">
+                                <option value="">Select Section</option>
+                                @foreach($sections as $section)
+                                    <option value="{{ $section->id }}">{{ $section->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="form-group">
+                            <select class="form-control" id="academic_year_id" name="academic_year_id">
+                                <option value="">Select Academic Year</option>
+                                @foreach($academicYears as $year)
+                                    <option value="{{ $year->id }}">{{ $year->year }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="search-student-btn">
+                            <button type="button" class="btn btn-primary" id="loadStudents">Load Students</button>
                         </div>
                     </div>
                 </div>
-                                                <div class="card-body p-3">
-                    <!-- Filter Form -->
-                    <form method="GET" action="{{ route('teacher.grading.grade-entry') }}" class="mb-3">
-                        <div class="row g-3">
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label for="subject_id" class="form-label fw-semibold text-dark small">
-                                        <i class="fas fa-book text-primary me-1"></i>Subject
-                                    </label>
-                                    <select name="subject_id" id="subject_id" class="form-select form-select-sm" required>
-                                        <option value="">Select Subject</option>
-                                        @foreach($subjects as $subject)
-                                            <option value="{{ $subject->id }}" {{ $selectedSubject == $subject->id ? 'selected' : '' }}>
-                                                {{ $subject->subject_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card card-table">
+                        <div class="card-body">
+                            <div class="page-header">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h3 class="page-title">Student Grades</h3>
+                                    </div>
+                                    <div class="col-auto text-end float-end ms-auto download-grp">
+                                        <a href="#" class="btn btn-outline-primary me-2" id="exportGrades">
+                                            <i class="fas fa-download"></i> Export
+                                        </a>
+                                        <button type="button" class="btn btn-primary" id="saveGrades">
+                                            <i class="fas fa-save"></i> Save Grades
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label for="section_id" class="form-label fw-semibold text-dark small">
-                                        <i class="fas fa-users text-primary me-1"></i>Section
-                                    </label>
-                                    <select name="section_id" id="section_id" class="form-select form-select-sm" required>
-                                        <option value="">Select Section</option>
-                                        @foreach($sections as $section)
-                                            <option value="{{ $section->id }}" {{ $selectedSection == $section->id ? 'selected' : '' }}>
-                                                {{ $section->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+
+                            <!-- Empty State -->
+                            <div class="text-center py-5" id="emptyState">
+                                <div class="mb-4">
+                                    <i class="fas fa-users text-primary" style="font-size: 4rem; opacity: 0.6;"></i>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label for="academic_year_id" class="form-label fw-semibold text-dark small">
-                                        <i class="fas fa-calendar-alt text-primary me-1"></i>Academic Year
-                                    </label>
-                                    <select name="academic_year_id" id="academic_year_id" class="form-select form-select-sm" required>
-                                        <option value="">Select Academic Year</option>
-                                        @foreach($academicYears as $year)
-                                            <option value="{{ $year->id }}" {{ $selectedAcademicYear == $year->id ? 'selected' : '' }}>
-                                                {{ $year->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label for="semester_id" class="form-label fw-semibold text-dark small">
-                                        <i class="fas fa-clock text-primary me-1"></i>Semester
-                                    </label>
-                                    <select name="semester_id" id="semester_id" class="form-select form-select-sm" required>
-                                        <option value="">Select Semester</option>
-                                        @foreach($semesters as $semester)
-                                            <option value="{{ $semester->id }}" {{ $selectedSemester == $semester->id ? 'selected' : '' }}>
-                                                {{ $semester->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                                                        <div class="row mt-3">
-                                    <div class="col-12">
-                                        <div class="d-flex gap-2">
-                                            <button type="submit" class="btn btn-primary btn-sm px-3 py-1">
-                                                <i class="fas fa-search me-1"></i>Load Students
-                                            </button>
-                                            <button type="reset" class="btn btn-outline-secondary btn-sm px-3 py-1">
-                                                <i class="fas fa-undo me-1"></i>Reset
-                                            </button>
+                                <h4 class="fw-bold text-dark mb-3">Select Criteria to Load Students</h4>
+                                <p class="text-muted mb-4">Choose a subject, section, and academic year above to begin grade entry.</p>
+                                
+                                <!-- Feature Highlights -->
+                                <div class="row justify-content-center">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center justify-content-center mb-2">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                            <span class="text-dark fw-medium">Easy grade entry</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center justify-content-center mb-2">
+                                            <i class="fas fa-chart-line text-primary me-2"></i>
+                                            <span class="text-dark fw-medium">Performance tracking</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center justify-content-center mb-2">
+                                            <i class="fas fa-download text-warning me-2"></i>
+                                            <span class="text-dark fw-medium">Export reports</span>
                                         </div>
                                     </div>
                                 </div>
-                    </form>
-
-                    <!-- Student List Section -->
-                    @if($students->count() > 0)
-                        <div class="alert alert-success d-flex align-items-center" role="alert">
-                            <i class="fas fa-check-circle me-2"></i>
-                            <div>
-                                <strong>Success!</strong> Found {{ $students->count() }} student(s) for the selected criteria.
                             </div>
-                        </div>
 
-                        <!-- Grade Entry Form -->
-                        <form method="POST" action="{{ route('teacher.grading.store-grades') }}" id="gradeForm">
-                            @csrf
-                            <input type="hidden" name="subject_id" value="{{ $selectedSubject }}">
-                            <input type="hidden" name="academic_year_id" value="{{ $selectedAcademicYear }}">
-                            <input type="hidden" name="semester_id" value="{{ $selectedSemester }}">
-
-                                                                <div class="row g-3 mb-3">
-                                        <div class="col-lg-4 col-md-6 col-sm-12">
-                                            <label for="component_id" class="form-label small">
-                                                <i class="fas fa-layer-group me-1"></i>Component
-                                            </label>
-                                            <select name="component_id" id="component_id" class="form-select form-select-sm" required>
+                            <!-- Grade Component Selection -->
+                            <div id="gradeComponentSection" style="display: none;">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="form-label">Grade Component</label>
+                                            <select class="form-control" id="component_id" name="component_id">
                                                 <option value="">Select Component</option>
                                                 @foreach($components as $component)
-                                                    <option value="{{ $component->id }}" data-weight="{{ $component->weight }}">
-                                                        {{ $component->name }} ({{ $component->weight }}%)
-                                                    </option>
+                                                    <option value="{{ $component->id }}">{{ $component->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-lg-2 col-md-3 col-sm-6">
-                                            <label for="max_score" class="form-label small">
-                                                <i class="fas fa-star me-1"></i>Max Score
-                                            </label>
-                                            <input type="number" name="max_score" id="max_score" class="form-control form-control-sm" value="100" min="1" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label class="form-label">Max Score</label>
+                                            <input type="number" class="form-control" id="max_score" name="max_score" value="100" min="1">
                                         </div>
-                                        <div class="col-lg-6 col-md-3 col-sm-6 d-flex align-items-end">
-                                            <div class="d-flex gap-2 w-100">
-                                                <button type="submit" class="btn btn-success btn-sm px-3 py-2">
-                                                    <i class="fas fa-save me-1"></i>Save Grades
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-success" id="saveGradesBtn">
+                                                    <i class="fas fa-save me-1"></i> Save Grades
                                                 </button>
-                                                <button type="button" class="btn btn-outline-secondary btn-sm px-3 py-2" onclick="clearAllGrades()">
-                                                    <i class="fas fa-eraser me-1"></i>Clear All
+                                                <button type="button" class="btn btn-outline-secondary" id="clearGrades">
+                                                    <i class="fas fa-eraser me-1"></i> Clear All
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-
-                            <div class="table-responsive">
-                                <table class="table table-hover table-striped table-sm">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th width="8%">
-                                                <i class="fas fa-id-card me-1"></i>ID
-                                            </th>
-                                            <th width="25%">
-                                                <i class="fas fa-user me-1"></i>Student Name
-                                            </th>
-                                            <th width="12%">
-                                                <i class="fas fa-chart-line me-1"></i>Score
-                                            </th>
-                                            <th width="12%">
-                                                <i class="fas fa-percentage me-1"></i>%
-                                            </th>
-                                            <th width="12%">
-                                                <i class="fas fa-award me-1"></i>Grade
-                                            </th>
-                                            <th width="31%">
-                                                <i class="fas fa-comment me-1"></i>Remarks
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($students as $student)
-                                            <tr>
-                                                <td>
-                                                    <span class="badge bg-secondary small">{{ $student->admission_id ?? $student->id }}</span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px;">
-                                                            <span class="text-white fw-bold small">{{ strtoupper(substr($student->first_name, 0, 1)) }}</span>
-                                                        </div>
-                                                        <div>
-                                                            <div class="fw-bold small">{{ $student->first_name }} {{ $student->last_name }}</div>
-                                                            <small class="text-muted">{{ $student->email ?? 'No email' }}</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <input type="number" 
-                                                           name="grades[{{ $loop->index }}][score]" 
-                                                           class="form-control form-control-sm score-input" 
-                                                           step="0.01" 
-                                                           min="0" 
-                                                           data-student="{{ $loop->index }}"
-                                                           placeholder="0.00">
-                                                    <input type="hidden" name="grades[{{ $loop->index }}][student_id]" value="{{ $student->id }}">
-                                                    <input type="hidden" name="grades[{{ $loop->index }}][max_score]" value="100">
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-info small percentage-display" data-student="{{ $loop->index }}">-</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-success small letter-grade-display" data-student="{{ $loop->index }}">-</span>
-                                                </td>
-                                                <td>
-                                                    <input type="text" 
-                                                           name="grades[{{ $loop->index }}][remarks]" 
-                                                           class="form-control form-control-sm" 
-                                                           placeholder="Remarks">
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div class="text-muted small">
-                                    <span class="me-3">
-                                        <i class="fas fa-users me-1"></i>{{ $students->count() }} Students
-                                    </span>
-                                    <span>
-                                        <i class="fas fa-clock me-1"></i>{{ now()->format('M d, Y H:i') }}
-                                    </span>
                                 </div>
                             </div>
-                        </form>
-                    @elseif($selectedSubject && $selectedSection)
-                        <div class="alert alert-warning d-flex align-items-center" role="alert">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <div>
-                                <strong>No students found!</strong> There are no students enrolled for the selected criteria. 
-                                Please check the enrollment status or contact the administrator.
+
+                            <!-- Students Table -->
+                            <div id="studentsTableSection" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table border-0 star-student table-hover table-center mb-0 datatable table-striped">
+                                        <thead class="student-thread">
+                                            <tr>
+                                                <th>
+                                                    <div class="form-check check-tables">
+                                                        <input class="form-check-input" type="checkbox" value="something" id="selectAll">
+                                                    </div>
+                                                </th>
+                                                <th>Student ID</th>
+                                                <th>Student Name</th>
+                                                <th>Score</th>
+                                                <th>Percentage</th>
+                                                <th>Letter Grade</th>
+                                                <th>Remarks</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="studentsTableBody">
+                                            <!-- Students will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    @else
-                        <div class="text-center py-4">
-                            <div class="bg-gradient-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 60px; height: 60px;">
-                                <i class="fas fa-users text-primary fa-2x"></i>
-                            </div>
-                            <h5 class="text-dark mb-2 fw-bold">Select Criteria to Load Students</h5>
-                            <p class="text-muted small">Choose a subject, section, academic year, and semester above to begin grade entry.</p>
-                        </div>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @push('styles')
 <style>
-/* Responsive adjustments for sidebar toggle */
-@media (max-width: 991.98px) {
-    .container-fluid {
-        padding-left: 15px !important;
-        padding-right: 15px !important;
-    }
+/* Admin-style form controls */
+.student-group-form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 31px 3px rgba(44,50,63,.02);
+    margin-bottom: 20px;
 }
 
-/* Default state - when sidebar is expanded */
-.container-fluid {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-    margin-left: 250px !important; /* Expanded sidebar width */
-    width: calc(100% - 250px) !important;
-    transition: all 0.3s ease-in-out !important;
-    position: relative !important;
-    z-index: 1 !important;
+.student-group-form .form-group {
+    margin-bottom: 0;
 }
 
-/* When sidebar is collapsed - maximize content without overlapping */
-.sidebar-collapsed .container-fluid {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    margin-left: 60px !important; /* Collapsed sidebar width */
-    width: calc(100% - 60px) !important;
-    transition: all 0.3s ease-in-out !important;
-    position: relative !important;
-    z-index: 1 !important;
+.student-group-form .form-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    height: 45px;
+    padding: 10px 15px;
+    font-size: 15px;
 }
 
-/* Ensure form card maximizes when sidebar is collapsed */
-.sidebar-collapsed .card {
-    max-width: 100% !important;
-    margin: 0 !important;
-    transition: all 0.3s ease-in-out !important;
+.student-group-form .form-control:focus {
+    border-color: #3d5ee1;
+    box-shadow: none;
+    outline: 0;
 }
 
-/* Sidebar transition styles */
-.sidebar {
-    transition: all 0.3s ease-in-out !important;
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    height: 100vh !important;
-    z-index: 1000 !important;
-    overflow: hidden !important;
+.search-student-btn .btn {
+    height: 45px;
+    padding: 10px 20px;
+    font-weight: 600;
 }
 
-/* Ensure smooth transitions for all elements */
-.card, .container-fluid, .sidebar {
-    transition: all 0.3s ease-in-out !important;
+/* Card styling */
+.card-table {
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0 0 31px 3px rgba(44,50,63,.02);
+    margin-bottom: 1.875rem;
 }
 
-/* Prevent any overlapping */
-.container-fluid {
-    box-sizing: border-box !important;
+.card-table .card-body {
+    padding: 1.5rem;
 }
 
-/* Ensure form respects sidebar space */
-.card {
-    box-sizing: border-box !important;
-    overflow: hidden !important;
+/* Table styling */
+.table {
+    color: #333;
+    max-width: 100%;
+    margin-bottom: 0;
+    width: 100%;
 }
 
-/* Ensure form elements are responsive */
-.form-select, .form-control {
-    min-height: 38px;
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    color: #000;
+    background-color: #f8f9fa;
+    border-color: #eff2f7;
+    padding: 15px;
 }
 
-/* Responsive table adjustments */
+.table tbody tr {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table tbody td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f7f7f7;
+}
+
+.table-hover tbody tr:hover td {
+    color: #474648;
+}
+
+/* Form elements in table */
+.table .form-control {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.table .form-control:focus {
+    border-color: #3d5ee1;
+    box-shadow: none;
+    outline: 0;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all .4s ease;
+}
+
+.btn-primary {
+    background-color: #3d5ee1;
+    border: 1px solid #3d5ee1;
+}
+
+.btn-primary:hover {
+    background-color: #18aefa;
+    border: 1px solid #18aefa;
+}
+
+.btn-success {
+    background-color: #7bb13c;
+    border: 1px solid #7bb13c;
+}
+
+.btn-success:hover {
+    background-color: #699834;
+    border: 1px solid #699834;
+}
+
+.btn-outline-primary {
+    color: #3d5ee1;
+    border-color: #3d5ee1;
+}
+
+.btn-outline-primary:hover {
+    background-color: #18aefa;
+    border-color: #18aefa;
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    justify-content: end;
+}
+
+.actions a {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+}
+
+.actions a:hover {
+    background-color: #3d5ee1 !important;
+    color: #fff !important;
+}
+
+/* Checkbox styling */
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin-top: 0;
+}
+
+.form-check-input:checked {
+    background-color: #3d5ee1;
+    border-color: #3d5ee1;
+}
+
+/* Empty state styling */
+#emptyState {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    margin: 2rem 0;
+}
+
+/* Page header */
+.page-header {
+    margin-bottom: 1.875rem;
+}
+
+.page-header .breadcrumb {
+    background-color: transparent;
+    color: #6c757d;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    padding: 0;
+    margin-left: auto;
+}
+
+.page-header .breadcrumb a {
+    color: #333;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #2c323f;
+    margin-bottom: 5px;
+}
+
+/* Download group */
+.download-grp {
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+    .student-group-form {
+        padding: 15px;
+    }
+    
+    .card-table .card-body {
+        padding: 1rem;
+    }
+    
     .table-responsive {
         font-size: 0.875rem;
     }
     
     .table th, .table td {
-        padding: 0.5rem 0.25rem;
-    }
-    
-    .btn-lg {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-    }
-}
-
-/* Ensure proper spacing when sidebar is collapsed */
-.sidebar-collapsed .container-fluid {
-    margin-left: 0 !important;
-    width: 100% !important;
-}
-
-/* Ensure form card has proper default styling */
-.card {
-    margin: 0 auto;
-    max-width: 1200px;
-    transition: all 0.3s ease;
-}
-
-/* Responsive adjustments for different screen sizes */
-@media (max-width: 768px) {
-    .container-fluid {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-    }
-}
-
-/* Responsive grid adjustments */
-@media (max-width: 576px) {
-    .row.g-3 > .col-md-6 {
-        margin-bottom: 1rem;
-    }
-    
-    .d-flex.justify-content-between {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .d-flex.justify-content-between > div {
-        text-align: center;
-    }
-}
-
-/* Ensure form maintains proper width */
-.card {
-    border-radius: 0.75rem;
-    border: none;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 0 !important;
-    padding: 1.5rem;
-}
-
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
-
-.bg-gradient-light {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-}
-
-/* Form improvements */
-.form-group {
-    margin-bottom: 0;
-}
-
-.form-select-sm, .form-control-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-    border-radius: 0.375rem;
-    border: 1px solid #dee2e6;
-    transition: all 0.3s ease;
-}
-
-.form-select-sm:focus, .form-control-sm:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-.form-label {
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-}
-
-/* Compact table styles */
-.table-sm td, .table-sm th {
-    padding: 0.5rem 0.25rem;
-    font-size: 0.875rem;
-}
-
-/* Compact button styles */
-.btn-sm {
-    padding: 0.375rem 0.75rem;
-    font-size: 0.875rem;
-    border-radius: 0.375rem;
-}
-
-/* Compact card styles */
-.card-body {
-    padding: 1rem;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .card-body {
-        padding: 0.75rem;
-    }
-    
-    .table-sm td, .table-sm th {
-        padding: 0.25rem 0.125rem;
-        font-size: 0.8rem;
-    }
-}
-
-/* Responsive button adjustments */
-@media (max-width: 480px) {
-    .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-    }
-    
-    .btn + .btn {
-        margin-left: 0 !important;
+        padding: 10px 8px;
     }
 }
 </style>
@@ -480,169 +418,150 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Handle sidebar toggle for better responsiveness
-    function adjustLayoutForSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.container-fluid');
-        const formCard = document.querySelector('.card');
+    // Load Students functionality
+    $('#loadStudents').on('click', function() {
+        const subjectId = $('#subject_id').val();
+        const sectionId = $('#section_id').val();
+        const academicYearId = $('#academic_year_id').val();
         
-        if (sidebar && mainContent) {
-            // Get current sidebar width to prevent overlapping
-            const sidebarWidth = sidebar.offsetWidth || 250;
-            const isCollapsed = sidebar.classList.contains('collapsed') || 
-                               sidebar.classList.contains('sidebar-collapsed') ||
-                               window.innerWidth < 992;
-            
-            if (isCollapsed) {
-                // Sidebar is collapsed - maximize content without overlapping
-                const collapsedSidebarWidth = 60; // Collapsed sidebar width
-                
-                mainContent.style.transition = 'all 0.3s ease-in-out';
-                mainContent.style.marginLeft = collapsedSidebarWidth + 'px';
-                mainContent.style.width = `calc(100% - ${collapsedSidebarWidth}px)`;
-                mainContent.style.paddingLeft = '1rem';
-                mainContent.style.paddingRight = '1rem';
-                document.body.classList.add('sidebar-collapsed');
-                
-                // Maximize form card within available space
-                if (formCard) {
-                    formCard.style.transition = 'all 0.3s ease-in-out';
-                    formCard.style.maxWidth = '100%';
-                    formCard.style.margin = '0';
-                    formCard.style.width = '100%';
-                }
-            } else {
-                // Sidebar is expanded - normal layout without overlapping
-                const expandedSidebarWidth = 250; // Expanded sidebar width
-                
-                mainContent.style.transition = 'all 0.3s ease-in-out';
-                mainContent.style.marginLeft = expandedSidebarWidth + 'px';
-                mainContent.style.width = `calc(100% - ${expandedSidebarWidth}px)`;
-                mainContent.style.paddingLeft = '2rem';
-                mainContent.style.paddingRight = '2rem';
-                document.body.classList.remove('sidebar-collapsed');
-                
-                // Reset form card to normal size within available space
-                if (formCard) {
-                    formCard.style.transition = 'all 0.3s ease-in-out';
-                    formCard.style.maxWidth = '1200px';
-                    formCard.style.margin = '0 auto';
-                    formCard.style.width = 'auto';
-                }
-            }
+        if (!subjectId || !sectionId || !academicYearId) {
+            alert('Please select all criteria before loading students.');
+            return;
         }
-    }
-    
-    // Listen for sidebar toggle events with multiple selectors
-    $(document).on('click', '[data-toggle="sidebar"], .sidebar-toggle, .burger-menu, .navbar-toggler, .btn-sidebar', function() {
-        setTimeout(adjustLayoutForSidebar, 50);
+        
+        // Show loading state
+        $(this).html('<i class="fas fa-spinner fa-spin me-2"></i>Loading...').prop('disabled', true);
+        
+        // Simulate loading students (replace with actual AJAX call)
+        setTimeout(function() {
+            $('#loadStudents').html('Load Students').prop('disabled', false);
+            $('#emptyState').hide();
+            $('#gradeComponentSection').show();
+            $('#studentsTableSection').show();
+            
+            // Populate sample students
+            populateStudentsTable();
+        }, 1000);
     });
     
-    // Listen for sidebar state changes
-    $(document).on('sidebar.toggle', function() {
-        setTimeout(adjustLayoutForSidebar, 50);
+    // Select all functionality
+    $('#selectAll').on('change', function() {
+        $('.student-checkbox').prop('checked', $(this).is(':checked'));
     });
-    
-    // Handle window resize
-    $(window).on('resize', function() {
-        setTimeout(adjustLayoutForSidebar, 100);
-    });
-    
-    // Initial adjustment
-    setTimeout(adjustLayoutForSidebar, 200);
-    
-    // Monitor for sidebar class changes
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                if (mutation.target.classList.contains('sidebar')) {
-                    setTimeout(adjustLayoutForSidebar, 50);
-                }
-            }
-        });
-    });
-    
-    // Start observing sidebar for class changes
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) {
-        observer.observe(sidebar, { attributes: true });
-    }
     
     // Auto-calculate percentage and letter grade
-    // Auto-calculate percentage and letter grade
-    $('.score-input').on('input', function() {
-        const studentIndex = $(this).data('student');
+    $(document).on('input', '.score-input', function() {
         const score = parseFloat($(this).val()) || 0;
         const maxScore = parseFloat($('#max_score').val()) || 100;
+        const percentage = (score / maxScore) * 100;
+        const letterGrade = getLetterGrade(percentage);
         
-        if (score > 0 && maxScore > 0) {
-            const percentage = (score / maxScore) * 100;
-            const letterGrade = getLetterGrade(percentage);
-            const gradeClass = getGradeClass(percentage);
-            
-            $(`.percentage-display[data-student="${studentIndex}"]`).text(percentage.toFixed(2) + '%');
-            $(`.letter-grade-display[data-student="${studentIndex}"]`).text(letterGrade).removeClass().addClass(`badge ${gradeClass}`);
-        } else {
-            $(`.percentage-display[data-student="${studentIndex}"]`).text('-');
-            $(`.letter-grade-display[data-student="${studentIndex}"]`).text('-').removeClass().addClass('badge bg-secondary');
+        const row = $(this).closest('tr');
+        row.find('.percentage-display').text(percentage.toFixed(1) + '%');
+        row.find('.letter-grade-display').text(letterGrade);
+    });
+    
+    // Save grades
+    $('#saveGrades, #saveGradesBtn').on('click', function() {
+        // Implement grade saving logic here
+        alert('Grades saved successfully!');
+    });
+    
+    // Clear all grades
+    $('#clearGrades').on('click', function() {
+        if (confirm('Are you sure you want to clear all grades?')) {
+            $('.score-input').val('');
+            $('.percentage-display').text('0.0%');
+            $('.letter-grade-display').text('F');
+            $('.remarks-select').val('');
         }
     });
-
-    // Update max score for all students
-    $('#max_score').on('input', function() {
-        $('.score-input').trigger('input');
+    
+    // Export grades
+    $('#exportGrades').on('click', function() {
+        // Implement export functionality
+        alert('Export functionality will be implemented here.');
     });
-
-    // Form validation
-    $('#gradeForm').on('submit', function(e) {
-        const componentId = $('#component_id').val();
-        if (!componentId) {
-            e.preventDefault();
-            alert('Please select a component before saving grades.');
-            $('#component_id').focus();
-            return false;
-        }
-        
-        const filledGrades = $('.score-input').filter(function() {
-            return $(this).val() !== '';
-        }).length;
-        
-        if (filledGrades === 0) {
-            e.preventDefault();
-            alert('Please enter at least one grade before saving.');
-            return false;
-        }
-    });
-
+    
+    // Helper function to get letter grade
     function getLetterGrade(percentage) {
-        if (percentage >= 90) return 'A';
-        if (percentage >= 85) return 'B+';
-        if (percentage >= 80) return 'B';
-        if (percentage >= 75) return 'C+';
-        if (percentage >= 70) return 'C';
-        if (percentage >= 65) return 'D+';
-        if (percentage >= 60) return 'D';
-        if (percentage >= 55) return 'E+';
-        if (percentage >= 50) return 'E';
+        if (percentage >= 93) return 'A';
+        if (percentage >= 90) return 'A-';
+        if (percentage >= 87) return 'B+';
+        if (percentage >= 83) return 'B';
+        if (percentage >= 80) return 'B-';
+        if (percentage >= 77) return 'C+';
+        if (percentage >= 73) return 'C';
+        if (percentage >= 70) return 'C-';
+        if (percentage >= 67) return 'D+';
+        if (percentage >= 63) return 'D';
+        if (percentage >= 60) return 'D-';
         return 'F';
     }
-
-    function getGradeClass(percentage) {
-        if (percentage >= 90) return 'bg-success';
-        if (percentage >= 80) return 'bg-info';
-        if (percentage >= 70) return 'bg-warning';
-        if (percentage >= 60) return 'bg-orange';
-        return 'bg-danger';
+    
+    // Populate students table with sample data
+    function populateStudentsTable() {
+        const sampleStudents = [
+            { id: 'STU001', name: 'John Doe', avatar: 'JD' },
+            { id: 'STU002', name: 'Jane Smith', avatar: 'JS' },
+            { id: 'STU003', name: 'Mike Johnson', avatar: 'MJ' },
+            { id: 'STU004', name: 'Sarah Wilson', avatar: 'SW' },
+            { id: 'STU005', name: 'David Brown', avatar: 'DB' }
+        ];
+        
+        let tableBody = '';
+        sampleStudents.forEach((student, index) => {
+            tableBody += `
+                <tr>
+                    <td>
+                        <div class="form-check check-tables">
+                            <input class="form-check-input student-checkbox" type="checkbox" value="${student.id}">
+                        </div>
+                    </td>
+                    <td>${student.id}</td>
+                    <td>
+                        <h2>
+                            <a>${student.name}</a>
+                        </h2>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control score-input" 
+                               data-student="${index}" min="0" max="100" 
+                               placeholder="Enter score" style="width: 100px;">
+                    </td>
+                    <td>
+                        <span class="percentage-display">0.0%</span>
+                    </td>
+                    <td>
+                        <span class="letter-grade-display">F</span>
+                    </td>
+                    <td>
+                        <select class="form-control remarks-select" style="width: 120px;">
+                            <option value="">Select</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                        </select>
+                    </td>
+                    <td class="text-end">
+                        <div class="actions">
+                            <a href="#" class="btn btn-sm bg-danger-light">
+                                <i class="far fa-edit"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm bg-danger-light">
+                                <i class="fe fe-trash-2"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        $('#studentsTableBody').html(tableBody);
     }
 });
-
-function clearAllGrades() {
-    if (confirm('Are you sure you want to clear all entered grades?')) {
-        $('.score-input').val('');
-        $('.percentage-display').text('-');
-        $('.letter-grade-display').text('-').removeClass().addClass('badge bg-secondary');
-    }
-}
 </script>
 @endpush
+
 @endsection 
