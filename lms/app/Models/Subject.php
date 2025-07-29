@@ -50,4 +50,19 @@ class Subject extends Model
     public function attendances() {
         return $this->hasMany(Attendance::class);
     }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
+
+    public function weightSettings()
+    {
+        return $this->hasMany(WeightSetting::class);
+    }
+
+    public function gradeAlerts()
+    {
+        return $this->hasMany(GradeAlert::class);
+    }
 }

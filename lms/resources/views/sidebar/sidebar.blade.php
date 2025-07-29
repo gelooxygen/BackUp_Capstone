@@ -49,7 +49,16 @@
                     <li>
                         <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
                     </li> 
-                    <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grade Entry</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-graduation-cap"></i> <span>Grading Management</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('teacher.grading.grade-entry') }}"><i class="fas fa-edit"></i> <span>Grade Entry</span></a></li>
+                            <li><a href="{{ route('teacher.grading.gpa-ranking') }}"><i class="fas fa-chart-bar"></i> <span>GPA Ranking</span></a></li>
+                            <li><a href="{{ route('teacher.grading.performance-analytics') }}"><i class="fas fa-chart-line"></i> <span>Performance Analytics</span></a></li>
+                            <li><a href="{{ route('teacher.grading.weight-settings') }}"><i class="fas fa-cog"></i> <span>Weight Settings</span></a></li>
+                            <li><a href="{{ route('teacher.grading.grade-alerts') }}"><i class="fas fa-exclamation-triangle"></i> <span>Grade Alerts</span></a></li>
+                        </ul>
+                    </li>
                     <li><a href="#"><i class="fas fa-upload"></i> <span>Upload Lesson Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Class Announcements</span></a></li>
                     <li><a href="#"><i class="fas fa-user"></i> <span>Student Profiles</span></a></li>

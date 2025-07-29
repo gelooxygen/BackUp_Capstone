@@ -36,4 +36,41 @@ class Student extends Model
     public function attendances() {
         return $this->hasMany(Attendance::class);
     }
+
+    public function grades()
+    {
+        return $this->hasMany(Grade::class);
+    }
+
+    public function gpaRecords()
+    {
+        return $this->hasMany(StudentGpa::class);
+    }
+
+    public function gradeAlerts()
+    {
+        return $this->hasMany(GradeAlert::class);
+    }
+
+    // Get current GPA for a specific academic period
+    public function getCurrentGpa($academicYearId = null, $semesterId = null)
+    {
+        $query = $this->gpaRecords();
+        
+        if ($academicYearId) {
+            $query->where('academic_year_id', $academicYearId);
+        }
+        
+        if ($semesterId) {
+            $query->where('semester_id', $semesterId);
+        }
+        
+        return $query->latest()->first();
+    }
+
+    // Get active alerts
+    public function getActiveAlerts()
+    {
+        return $this->gradeAlerts()->where('is_resolved', false)->get();
+    }
 }

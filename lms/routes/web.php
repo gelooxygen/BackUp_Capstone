@@ -186,6 +186,8 @@ Route::resource('enrollments', EnrollmentController::class)->middleware('auth');
 Route::resource('sections', SectionController::class)->middleware('auth');
 Route::resource('attendance', AttendanceController::class);
 Route::get('attendance/export', [App\Http\Controllers\AttendanceController::class, 'export'])->name('attendance.export');
+Route::get('attendance/student', [App\Http\Controllers\AttendanceController::class, 'studentView'])->name('attendance.student');
+Route::get('attendance/parent', [App\Http\Controllers\AttendanceController::class, 'parentView'])->name('attendance.parent');
 
 // Curriculum Management
 Route::resource('curriculum', App\Http\Controllers\CurriculumController::class);
@@ -194,14 +196,50 @@ Route::post('curriculum/{id}/assign-subjects', [App\Http\Controllers\CurriculumC
 
 // Admin-only routes
 Route::group(['middleware' => ['role:Admin']], function () {
-    // Place admin-only routes here
-    // Example:
-    // Route::get('admin/users', 'UserManagementController@index')->name('admin.users');
+    // ----------------------- Grading Module Routes (Admin Access) -----------------------------//
+    Route::group(['prefix' => 'admin/grading'], function () {
+        // GPA and Ranking (Admin can view all)
+        Route::get('gpa-ranking', [App\Http\Controllers\GradingController::class, 'gpaRanking'])->name('admin.grading.gpa-ranking');
+        
+        // Performance Analytics (Admin can view all)
+        Route::get('performance-analytics', [App\Http\Controllers\GradingController::class, 'performanceAnalytics'])->name('admin.grading.performance-analytics');
+        
+        // Grade Alerts (Admin can manage all)
+        Route::get('grade-alerts', [App\Http\Controllers\GradingController::class, 'gradeAlerts'])->name('admin.grading.grade-alerts');
+        Route::post('resolve-alert/{alert}', [App\Http\Controllers\GradingController::class, 'resolveAlert'])->name('admin.grading.resolve-alert');
+        
+        // Export Routes (Admin can export all)
+        Route::get('export-grades', [App\Http\Controllers\GradingController::class, 'exportGrades'])->name('admin.grading.export-grades');
+        Route::get('export-gpa', [App\Http\Controllers\GradingController::class, 'exportGpa'])->name('admin.grading.export-gpa');
+    });
 });
 
 // Teacher-only routes
 Route::group(['middleware' => ['role:Teacher']], function () {
-    // Place teacher-only routes here
+    // ----------------------- Grading Module Routes (Teacher Only) -----------------------------//
+    Route::group(['prefix' => 'grading'], function () {
+        // Grade Entry
+        Route::get('grade-entry', [App\Http\Controllers\GradingController::class, 'gradeEntryForm'])->name('teacher.grading.grade-entry');
+        Route::post('store-grades', [App\Http\Controllers\GradingController::class, 'storeGrades'])->name('teacher.grading.store-grades');
+        
+        // GPA and Ranking
+        Route::get('gpa-ranking', [App\Http\Controllers\GradingController::class, 'gpaRanking'])->name('teacher.grading.gpa-ranking');
+        
+        // Performance Analytics
+        Route::get('performance-analytics', [App\Http\Controllers\GradingController::class, 'performanceAnalytics'])->name('teacher.grading.performance-analytics');
+        
+        // Weight Settings
+        Route::get('weight-settings', [App\Http\Controllers\GradingController::class, 'weightSettings'])->name('teacher.grading.weight-settings');
+        Route::post('store-weight-settings', [App\Http\Controllers\GradingController::class, 'storeWeightSettings'])->name('teacher.grading.store-weight-settings');
+        
+        // Grade Alerts
+        Route::get('grade-alerts', [App\Http\Controllers\GradingController::class, 'gradeAlerts'])->name('teacher.grading.grade-alerts');
+        Route::post('resolve-alert/{alert}', [App\Http\Controllers\GradingController::class, 'resolveAlert'])->name('teacher.grading.resolve-alert');
+        
+        // Export Routes
+        Route::get('export-grades', [App\Http\Controllers\GradingController::class, 'exportGrades'])->name('teacher.grading.export-grades');
+        Route::get('export-gpa', [App\Http\Controllers\GradingController::class, 'exportGpa'])->name('teacher.grading.export-gpa');
+    });
 });
 
 // Student-only routes
@@ -220,3 +258,13 @@ Route::get('sections/{id}/assign-students', [SectionController::class, 'assignSt
 Route::post('sections/{id}/assign-students', [SectionController::class, 'assignStudents'])->name('sections.assignStudents');
 Route::get('teacher/{id}/assign-grade-levels', [App\Http\Controllers\TeacherController::class, 'assignGradeLevelsForm'])->name('teacher.assignGradeLevelsForm');
 Route::post('teacher/{id}/assign-grade-levels', [App\Http\Controllers\TeacherController::class, 'assignGradeLevels'])->name('teacher.assignGradeLevels');
+Route::get('api/sections/{section}/subjects', function(App\Models\Section $section) {
+    return $section->students()
+        ->with('subjects')
+        ->get()
+        ->pluck('subjects')
+        ->flatten()
+        ->unique('id')
+        ->values();
+})->name('api.section.subjects');
+
