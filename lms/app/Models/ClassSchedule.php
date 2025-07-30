@@ -18,6 +18,7 @@ class ClassSchedule extends Model
         'day_of_week',
         'start_time',
         'end_time',
+        'class_type',
         'color',
         'is_active',
         'notes'
@@ -117,6 +118,22 @@ class ClassSchedule extends Model
     public function getDayNameAttribute()
     {
         return ucfirst($this->day_of_week);
+    }
+
+    /**
+     * Get the formatted class type display name
+     */
+    public function getClassTypeDisplayAttribute()
+    {
+        $types = [
+            'lecture' => 'Lecture',
+            'laboratory' => 'Laboratory',
+            'tutorial' => 'Tutorial',
+            'exam' => 'Exam',
+            'other' => 'Other'
+        ];
+
+        return $types[$this->class_type] ?? 'Lecture';
     }
 
     /**

@@ -32,4 +32,12 @@ class Teacher extends Model
     {
         return $this->hasMany(\App\Models\TeacherGradeLevel::class, 'teacher_id');
     }
+
+    /**
+     * Get the teacher's full name
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->full_name;
+    }
 }

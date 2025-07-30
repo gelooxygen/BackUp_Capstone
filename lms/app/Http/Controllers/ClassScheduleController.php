@@ -247,4 +247,25 @@ class ClassScheduleController extends Controller
             'today_schedule' => ClassSchedule::getTodaySchedule($studentId)
         ]);
     }
+
+    /**
+     * Display the student's personal schedule page
+     */
+    public function mySchedule()
+    {
+        if (Auth::user()->role_name !== 'Student') {
+            return redirect()->back()->with('error', 'Access denied. This page is for students only.');
+        }
+
+        $student = Auth::user()->student;
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+
+        $weeklySchedule = ClassSchedule::getWeeklySchedule($student->id);
+        $todaySchedule = ClassSchedule::getTodaySchedule($student->id);
+        $nextDaysSchedule = ClassSchedule::getNextDaysSchedule($student->id, 7);
+
+        return view('schedule.my-schedule', compact('student', 'weeklySchedule', 'todaySchedule', 'nextDaysSchedule'));
+    }
 }

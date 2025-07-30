@@ -362,5 +362,13 @@ Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], f
 Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teacher']], function () {
     Route::get('/', [App\Http\Controllers\ClassScheduleController::class, 'index'])->name('schedule.index');
     Route::get('/dashboard-data', [App\Http\Controllers\ClassScheduleController::class, 'getDashboardSchedule'])->name('schedule.dashboard-data');
+    Route::get('/test-my-schedule', function() {
+        return view('test.my-schedule-test');
+    })->name('schedule.test');
+});
+
+// Student-specific routes
+Route::group(['middleware' => ['role:Student']], function () {
+    Route::get('/my-schedule', [App\Http\Controllers\ClassScheduleController::class, 'mySchedule'])->name('student.my-schedule');
 });
 

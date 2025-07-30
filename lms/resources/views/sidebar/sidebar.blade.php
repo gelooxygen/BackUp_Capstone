@@ -83,7 +83,7 @@
                     <li class="submenu">
                         <a href="{{ route('student/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
-                    <li><a href="{{ route('schedule.index') }}"><i class="fas fa-calendar-alt"></i> <span>Class Schedule</span></a></li>
+                    <li><a href="{{ route('student.my-schedule') }}"><i class="fas fa-calendar-alt"></i> <span>My Schedule</span></a></li>
                     <li><a href="#"><i class="fas fa-download"></i> <span>Learning Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
