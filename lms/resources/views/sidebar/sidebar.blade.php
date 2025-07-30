@@ -33,7 +33,14 @@
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Overview</span></a></li>
                     <li><a href="#"><i class="fas fa-file-alt"></i> <span>Reports & Logs</span></a></li>
                     <li><a href="{{ route('setting/page') }}"><i class="fas fa-cog"></i> <span>System Settings</span></a></li>
-                    <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Announcement Management</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
+                            <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                            <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                        </ul>
+                    </li>
                     {{-- Curriculum Management only for Admins --}}
                     <li>
                         <a href="{{ route('curriculum.index') }}"><i class="fas fa-book"></i> <span>Curriculum Management</span></a>
@@ -47,10 +54,6 @@
                     <li class="submenu">
                         <a href="{{ route('teacher/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
-                    <li><a href="#"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
-                    <li>
-                        <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
-                    </li> 
                     <li class="submenu">
                         <a href="#"><i class="fas fa-graduation-cap"></i> <span>Grading Management</span> <span class="menu-arrow"></span></a>
                         <ul>
@@ -70,10 +73,21 @@
                             <li><a href="{{ route('lessons.recommendations.class-analysis') }}"><i class="fas fa-users"></i> <span>Class Analysis</span></a></li>
                         </ul>
                     </li>
+                    <li>
+                        <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
+                    </li> 
                     <li><a href="{{ route('analytics.teacher-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>Performance Analytics</span></a></li>
                     <li><a href="{{ route('calendar.index') }}"><i class="fas fa-calendar"></i> <span>Calendar Management</span></a></li>
+                    <li><a href="#"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
                     <li><a href="#"><i class="fas fa-upload"></i> <span>Upload Lesson Materials</span></a></li>
-                    <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Class Announcements</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
+                            <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                            <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                        </ul>
+                    </li>
                     <li><a href="#"><i class="fas fa-user"></i> <span>Student Profiles</span></a></li>
                    
                 @endif
@@ -87,7 +101,14 @@
                     <li><a href="#"><i class="fas fa-download"></i> <span>Learning Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
-                    <li><a href="#"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
+                            <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                            <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                        </ul>
+                    </li>
                     <li><a href="{{ route('analytics.student-dashboard') }}"><i class="fas fa-chart-line"></i> <span>My Analytics</span></a></li>
                 @endif
 
@@ -99,8 +120,15 @@
                     <li><a href="#"><i class="fas fa-user"></i> <span>Child Profile</span></a></li>
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance</span></a></li>
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
-                    <li><a href="{{ route('schedule.index') }}"><i class="fas fa-calendar-alt"></i> <span>Class Schedule</span></a></li>
-                    <li><a href="#"><i class="fas fa-envelope"></i> <span>Contact Teachers</span></a></li>
+                    <li><a href="{{ route('parent.schedule') }}"><i class="fas fa-calendar-alt"></i> <span>Class Schedule</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
+                            <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
+                            <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                        </ul>
+                    </li>
                 @endif
             </ul>
         </div>

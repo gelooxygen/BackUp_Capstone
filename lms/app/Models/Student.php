@@ -18,6 +18,7 @@ class Student extends Model
         'blood_group',
         'religion',
         'email',
+        'parent_email',
         'class',
         'year_level',
         'section',

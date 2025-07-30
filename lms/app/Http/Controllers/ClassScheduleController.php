@@ -6,6 +6,7 @@ use App\Models\ClassSchedule;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ClassScheduleController extends Controller
@@ -16,16 +17,58 @@ class ClassScheduleController extends Controller
     public function index(Request $request)
     {
         $studentId = $request->get('student_id');
+        $user = Auth::user();
         
-        // If no student_id provided, try to get current user's student record
-        if (!$studentId && Auth::user()->role_name === 'Student') {
-            $student = Auth::user()->student;
-            if ($student) {
-                $studentId = $student->id;
+        // Debug logging for user info
+        Log::info('Schedule Access Attempt', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_role' => $user->role_name,
+            'requested_student_id' => $studentId
+        ]);
+        
+        // Handle different user roles
+        if ($user->role_name === 'Student') {
+            // If no student_id provided, try to get current user's student record
+            if (!$studentId) {
+                $student = $user->student;
+                if ($student) {
+                    $studentId = $student->id;
+                }
+            }
+        } elseif ($user->role_name === 'Parent') {
+            // For parents, get their children and use the first one if no specific child selected
+            $children = \App\Models\Student::where('parent_email', $user->email)->get();
+            
+            Log::info('Parent children found', [
+                'parent_email' => $user->email,
+                'children_count' => $children->count(),
+                'children_ids' => $children->pluck('id')->toArray()
+            ]);
+            
+            if ($children->isEmpty()) {
+                Log::warning('No children linked to parent', ['parent_email' => $user->email]);
+                return redirect()->back()->with('error', 'No children linked to your account');
+            }
+            
+            if (!$studentId) {
+                $studentId = $children->first()->id;
+                Log::info('Using first child', ['student_id' => $studentId]);
+            } else {
+                // Verify the student belongs to this parent
+                $child = $children->where('id', $studentId)->first();
+                if (!$child) {
+                    Log::warning('Parent trying to access unauthorized student', [
+                        'parent_email' => $user->email,
+                        'requested_student_id' => $studentId
+                    ]);
+                    return redirect()->back()->with('error', 'Access denied. This student is not linked to your account.');
+                }
             }
         }
 
         if (!$studentId) {
+            Log::error('No student ID found', ['user_role' => $user->role_name]);
             return redirect()->back()->with('error', 'Student not found');
         }
 
@@ -34,12 +77,33 @@ class ClassScheduleController extends Controller
 
         $student = Student::with('sections')->find($studentId);
         if (!$student) {
+            Log::error('Student not found in database', ['student_id' => $studentId]);
             return redirect()->back()->with('error', 'Student not found');
         }
 
+        Log::info('Student found', [
+            'student_id' => $student->id,
+            'student_name' => $student->full_name,
+            'sections_count' => $student->sections->count(),
+            'section_ids' => $student->sections->pluck('id')->toArray()
+        ]);
+
         if ($student->sections->isEmpty()) {
+            Log::warning('Student has no sections assigned', [
+                'student_id' => $student->id,
+                'student_name' => $student->full_name
+            ]);
             return redirect()->back()->with('error', 'Student is not assigned to any section');
         }
+
+        // Debug logging
+        Log::info('Schedule Debug', [
+            'student_id' => $studentId,
+            'student_name' => $student->full_name,
+            'sections_count' => $student->sections->count(),
+            'section_ids' => $student->sections->pluck('id')->toArray(),
+            'user_role' => $user->role_name
+        ]);
 
         if ($request->ajax()) {
             return $this->getScheduleData($studentId, $view, $startDate);
@@ -48,6 +112,13 @@ class ClassScheduleController extends Controller
         $weeklySchedule = ClassSchedule::getWeeklySchedule($studentId, $startDate);
         $todaySchedule = ClassSchedule::getTodaySchedule($studentId);
         $nextDaysSchedule = ClassSchedule::getNextDaysSchedule($studentId, 7);
+
+        // Debug logging for schedules
+        Log::info('Schedule Data', [
+            'weekly_schedule_count' => collect($weeklySchedule)->flatten()->count(),
+            'today_schedule_count' => $todaySchedule->count(),
+            'next_days_schedule_count' => count($nextDaysSchedule)
+        ]);
 
         return view('schedule.index', compact('student', 'weeklySchedule', 'todaySchedule', 'nextDaysSchedule', 'view', 'startDate'));
     }

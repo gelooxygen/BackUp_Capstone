@@ -312,19 +312,32 @@ class AttendanceController extends Controller
 
         $subjects = Subject::orderBy('subject_name')->get();
         $subjectId = $request->input('subject_id');
+        $sectionId = $request->input('section_id');
         $month = $request->input('month', now()->format('Y-m'));
         $year = substr($month, 0, 4);
         $monthNum = substr($month, 5, 2);
         $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
         $days = range(1, $daysInMonth);
 
-        // Get students for the subject or all
+        // Get students for the subject/section or all
+        $studentsQuery = Student::query();
+        
+        if ($sectionId) {
+            $studentsQuery->whereHas('sections', function($q) use ($sectionId) {
+                $q->where('sections.id', $sectionId);
+            });
+        }
+        
         if ($subjectId) {
-            $students = Student::whereHas('subjects', function($q) use ($subjectId) {
+            $studentsQuery->whereHas('subjects', function($q) use ($subjectId) {
                 $q->where('subjects.id', $subjectId);
-            })->orderBy('first_name')->get();
-        } else {
-            $students = Student::orderBy('first_name')->get();
+            });
+        }
+        
+        $students = $studentsQuery->orderBy('first_name')->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'No students found for the selected criteria.');
         }
 
         // Get attendance records for the month/subject
@@ -353,7 +366,7 @@ class AttendanceController extends Controller
             $row = [$student->first_name . ' ' . $student->last_name];
             foreach ($days as $day) {
                 $status = $attendanceMap[$student->id][$day] ?? null;
-                $row[] = $status === 'present' ? 'P' : ($status === 'absent' ? 'A' : '-');
+                $row[] = $status === 'present' ? 'P' : ($status === 'absent' ? 'A' : ($status === 'late' ? 'L' : '-'));
                 if ($status) {
                     $total++;
                     if ($status === 'present') {
@@ -361,7 +374,7 @@ class AttendanceController extends Controller
                     }
                 }
             }
-            $percentage = $total > 0 ? round(($present / $total) * 100, 2) : null;
+            $percentage = $total > 0 ? round(($present / $total) * 100, 2) : 0;
             $row[] = $present;
             $row[] = $total;
             $row[] = $percentage;
@@ -373,7 +386,7 @@ class AttendanceController extends Controller
             ];
         }
 
-        $format = $request->input('format');
+        $format = $request->input('format', 'excel');
         $filename = 'attendance_summary_' . $month . ($subjectId ? '_subject_' . $subjectId : '') . '.' . ($format === 'excel' ? 'xlsx' : 'pdf');
 
         if ($format === 'excel') {

@@ -38,6 +38,6 @@ class Teacher extends Model
      */
     public function getFullNameAttribute()
     {
-        return $this->full_name;
+        return $this->attributes['full_name'] ?? '';
     }
 }

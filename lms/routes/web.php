@@ -359,7 +359,7 @@ Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], f
 });
 
 // Schedule Routes
-Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teacher']], function () {
+Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teacher,Parent']], function () {
     Route::get('/', [App\Http\Controllers\ClassScheduleController::class, 'index'])->name('schedule.index');
     Route::get('/dashboard-data', [App\Http\Controllers\ClassScheduleController::class, 'getDashboardSchedule'])->name('schedule.dashboard-data');
     Route::get('/test-my-schedule', function() {
@@ -370,5 +370,73 @@ Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teach
 // Student-specific routes
 Route::group(['middleware' => ['role:Student']], function () {
     Route::get('/my-schedule', [App\Http\Controllers\ClassScheduleController::class, 'mySchedule'])->name('student.my-schedule');
+});
+
+// Messaging and Notification Routes
+Route::group(['prefix' => 'announcements', 'middleware' => ['auth']], function () {
+    Route::get('/', [App\Http\Controllers\AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::get('/create', [App\Http\Controllers\AnnouncementController::class, 'create'])->name('announcements.create');
+    Route::post('/', [App\Http\Controllers\AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::get('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'show'])->name('announcements.show');
+    Route::get('/{announcement}/edit', [App\Http\Controllers\AnnouncementController::class, 'edit'])->name('announcements.edit');
+    Route::put('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'update'])->name('announcements.update');
+    Route::delete('/{announcement}', [App\Http\Controllers\AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+    Route::patch('/{announcement}/toggle-pin', [App\Http\Controllers\AnnouncementController::class, 'togglePin'])->name('announcements.toggle-pin');
+    Route::get('/dashboard/data', [App\Http\Controllers\AnnouncementController::class, 'getDashboardAnnouncements'])->name('announcements.dashboard-data');
+});
+
+Route::group(['prefix' => 'messages', 'middleware' => ['auth']], function () {
+    Route::get('/', [App\Http\Controllers\MessageController::class, 'index'])->name('messages.index');
+    Route::get('/sent', [App\Http\Controllers\MessageController::class, 'sent'])->name('messages.sent');
+    Route::get('/archived', [App\Http\Controllers\MessageController::class, 'archived'])->name('messages.archived');
+    Route::get('/create', [App\Http\Controllers\MessageController::class, 'create'])->name('messages.create');
+    Route::post('/', [App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
+    Route::get('/{message}', [App\Http\Controllers\MessageController::class, 'show'])->name('messages.show');
+    Route::delete('/{message}', [App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::patch('/{message}/read', [App\Http\Controllers\MessageController::class, 'markAsRead'])->name('messages.mark-read');
+    Route::patch('/{message}/unread', [App\Http\Controllers\MessageController::class, 'markAsUnread'])->name('messages.mark-unread');
+    Route::patch('/{message}/archive', [App\Http\Controllers\MessageController::class, 'archive'])->name('messages.archive');
+    Route::patch('/{message}/unarchive', [App\Http\Controllers\MessageController::class, 'unarchive'])->name('messages.unarchive');
+    Route::get('/conversation/{userId}', [App\Http\Controllers\MessageController::class, 'conversation'])->name('messages.conversation');
+    Route::get('/unread-count', [App\Http\Controllers\MessageController::class, 'getUnreadCount'])->name('messages.unread-count');
+});
+
+// Notification Routes
+Route::group(['prefix' => 'notifications', 'middleware' => ['auth']], function () {
+    Route::get('/', function() {
+        return view('notifications.index');
+    })->name('notifications.index');
+    
+    Route::patch('/{id}/mark-as-read', function($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        return response()->json(['success' => true]);
+    })->name('notifications.mark-read');
+    
+    Route::patch('/{id}/mark-as-unread', function($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsUnread();
+        return response()->json(['success' => true]);
+    })->name('notifications.mark-unread');
+    
+    Route::delete('/{id}', function($id) {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->delete();
+        return response()->json(['success' => true]);
+    })->name('notifications.delete');
+    
+    Route::patch('/mark-all-read', function() {
+        auth()->user()->unreadNotifications->markAsRead();
+        return response()->json(['success' => true]);
+    })->name('notifications.mark-all-read');
+});
+
+// Parent Routes
+Route::group(['prefix' => 'parent', 'middleware' => ['auth', 'role:Parent']], function () {
+    Route::get('/child/{childId}/grades', [App\Http\Controllers\ParentController::class, 'childGrades'])->name('parent.child.grades');
+    Route::get('/child/{childId}/attendance', [App\Http\Controllers\ParentController::class, 'childAttendance'])->name('parent.child.attendance');
+    Route::get('/child/{childId}/activities', [App\Http\Controllers\ParentController::class, 'childActivities'])->name('parent.child.activities');
+    Route::get('/schedule', [App\Http\Controllers\ClassScheduleController::class, 'index'])->name('parent.schedule');
+    Route::get('/test', function() { return 'Parent route working!'; })->name('parent.test');
 });
 

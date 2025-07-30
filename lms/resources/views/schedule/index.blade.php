@@ -8,7 +8,13 @@
             <div class="page-header">
                 <div class="row align-items-center">
                     <div class="col">
-                        <h3 class="page-title">My Class Schedule</h3>
+                        <h3 class="page-title">
+                            @if(Auth::user()->role_name === 'Parent')
+                                Child's Class Schedule
+                            @else
+                                My Class Schedule
+                            @endif
+                        </h3>
                         <ul class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
                             <li class="breadcrumb-item active">Class Schedule</li>
@@ -23,6 +29,33 @@
                     </div>
                 </div>
             </div>
+
+            @if(Auth::user()->role_name === 'Parent')
+                <!-- Child Selector for Parents -->
+                @php
+                    $children = \App\Models\Student::where('parent_email', Auth::user()->email)->get();
+                @endphp
+                @if($children->count() > 1)
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <h5 class="mb-0 me-3">Select Child:</h5>
+                                        <select class="form-control w-auto" id="childSelector" onchange="switchChild(this.value)">
+                                            @foreach($children as $child)
+                                                <option value="{{ $child->id }}" {{ $student->id == $child->id ? 'selected' : '' }}>
+                                                    {{ $child->full_name }} - {{ $child->sections->first()->name ?? 'No Section' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            @endif
 
             <!-- Student Info -->
             <div class="row mb-4">
@@ -304,7 +337,7 @@ function initializeCalendar() {
         slotMinTime: '07:00:00',
         slotMaxTime: '18:00:00',
         events: {
-            url: '{{ route("schedule.index") }}',
+            url: '{{ Auth::user()->role_name === "Parent" ? route("parent.schedule") : route("schedule.index") }}',
             method: 'GET',
             extraParams: {
                 view: 'week',
@@ -405,5 +438,11 @@ function showEventDetails(event) {
     const modal = new bootstrap.Modal(document.getElementById('eventModal'));
     modal.show();
 }
+
+@if(Auth::user()->role_name === 'Parent')
+function switchChild(childId) {
+    window.location.href = '{{ route("parent.schedule") }}?student_id=' + childId;
+}
+@endif
 </script>
 @endpush 

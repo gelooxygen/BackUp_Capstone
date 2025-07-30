@@ -54,9 +54,9 @@ class HomeController extends Controller
     }
 
     /** parent dashboard */
-    public function parentDashboardIndex()
+    public function parentDashboardIndex(Request $request)
     {
-        return view('dashboard.parent_dashboard');
+        return app(\App\Http\Controllers\ParentController::class)->dashboard($request);
     }
 
     /**
@@ -72,7 +72,7 @@ class HomeController extends Controller
         } elseif ($user->role_name === User::ROLE_STUDENT) {
             return view('dashboard.student_dashboard');
         } elseif ($user->role_name === User::ROLE_PARENT) {
-            return view('dashboard.parent_dashboard');
+            return app(\App\Http\Controllers\ParentController::class)->dashboard(request());
         }
         abort(403);
     }

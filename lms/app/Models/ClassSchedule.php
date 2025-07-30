@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ClassSchedule extends Model
@@ -166,22 +167,39 @@ class ClassSchedule extends Model
     {
         $student = Student::find($studentId);
         if (!$student) {
+            Log::info('Student not found', ['student_id' => $studentId]);
             return collect();
         }
 
         // Get the student's sections (many-to-many relationship)
         $sectionIds = $student->sections()->pluck('sections.id');
         
+        Log::info('Student sections debug', [
+            'student_id' => $studentId,
+            'student_name' => $student->full_name,
+            'section_ids' => $sectionIds->toArray(),
+            'section_count' => $sectionIds->count()
+        ]);
+        
         if ($sectionIds->isEmpty()) {
+            Log::info('No sections found for student', ['student_id' => $studentId]);
             return collect();
         }
 
-        return self::with(['subject', 'teacher', 'room'])
+        $schedules = self::with(['subject', 'teacher', 'room'])
             ->whereIn('section_id', $sectionIds)
             ->where('is_active', true)
             ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
+
+        Log::info('Schedules found for student', [
+            'student_id' => $studentId,
+            'schedule_count' => $schedules->count(),
+            'section_ids_queried' => $sectionIds->toArray()
+        ]);
+
+        return $schedules;
     }
 
     /**
