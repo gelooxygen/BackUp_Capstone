@@ -13,7 +13,20 @@ class SubjectController extends Controller
     /** index page */
     public function subjectList()
     {
-        $subjectList = Subject::all();
+        $query = Subject::query();
+        
+        // Search/Filter logic
+        if ($id = request('search_id')) {
+            $query->where('subject_id', 'like', "%$id%");
+        }
+        if ($name = request('search_name')) {
+            $query->where('subject_name', 'like', "%$name%");
+        }
+        if ($class = request('search_class')) {
+            $query->where('class', 'like', "%$class%");
+        }
+        
+        $subjectList = $query->get();
         return view('subjects.subject_list',compact('subjectList'));
     }
 

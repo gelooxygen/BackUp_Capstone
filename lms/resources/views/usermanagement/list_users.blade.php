@@ -24,22 +24,23 @@
             <div class="row">
                 <div class="col-lg-3 col-md-6">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search by ID ...">
+                        <input type="text" class="form-control" id="search_id" placeholder="Search by ID ...">
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search by Name ...">
+                        <input type="text" class="form-control" id="search_name" placeholder="Search by Name ...">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search by Phone ...">
+                        <input type="text" class="form-control" id="search_phone" placeholder="Search by Phone ...">
                     </div>
                 </div>
                 <div class="col-lg-2">
                     <div class="search-student-btn">
-                        <button type="btn" class="btn btn-primary">Search</button>
+                        <button type="button" class="btn btn-primary" id="search_btn">Search</button>
+                        <button type="button" class="btn btn-secondary" id="clear_btn">Clear</button>
                     </div>
                 </div>
             </div>
@@ -120,13 +121,18 @@
 {{-- get user all js --}}
 <script type="text/javascript">
     $(document).ready(function() {
-       $('#UsersList').DataTable({
+        var table = $('#UsersList').DataTable({
             processing: true,
             serverSide: true,
             ordering: true,
             searching: true,
             ajax: {
                 url:"{{ route('get-users-data') }}",
+                data: function(d) {
+                    d.search_id = $('#search_id').val();
+                    d.search_name = $('#search_name').val();
+                    d.search_phone = $('#search_phone').val();
+                }
             },
             columns: [
                 {
@@ -167,6 +173,26 @@
                     name: 'modify',
                 },
             ]
+        });
+
+        // Search button click event
+        $('#search_btn').click(function() {
+            table.draw();
+        });
+
+        // Clear button click event
+        $('#clear_btn').click(function() {
+            $('#search_id').val('');
+            $('#search_name').val('');
+            $('#search_phone').val('');
+            table.draw();
+        });
+
+        // Search on Enter key press
+        $('#search_id, #search_name, #search_phone').keypress(function(e) {
+            if(e.which == 13) { // Enter key
+                table.draw();
+            }
         });
     });
 </script>

@@ -22,8 +22,21 @@ class TeacherController extends Controller
     /** teacher list */
     public function teacherList()
     {
-        $listTeacher = Teacher::join('users', 'teachers.user_id','users.user_id')
-                    ->select('users.date_of_birth','users.join_date','users.phone_number','teachers.*')->get();
+        $query = Teacher::join('users', 'teachers.user_id','users.user_id')
+                    ->select('users.date_of_birth','users.join_date','users.phone_number','teachers.*');
+        
+        // Search/Filter logic
+        if ($id = request('search_id')) {
+            $query->where('teachers.user_id', 'like', "%$id%");
+        }
+        if ($name = request('search_name')) {
+            $query->where('teachers.full_name', 'like', "%$name%");
+        }
+        if ($phone = request('search_phone')) {
+            $query->where('teachers.phone_number', 'like', "%$phone%");
+        }
+        
+        $listTeacher = $query->get();
         return view('teacher.list-teachers',compact('listTeacher'));
     }
 

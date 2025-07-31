@@ -39,30 +39,45 @@ class DepartmentController extends Controller
         $order_arr       = $request->get('order');
         $search_arr      = $request->get('search');
 
+        // Custom search parameters
+        $searchDepartmentId = $request->get('search_department_id');
+        $searchDepartmentName = $request->get('search_department_name');
+        $searchDepartmentYear = $request->get('search_department_year');
+
         $columnIndex     = $columnIndex_arr[0]['column']; // Column index
         $columnName      = $columnName_arr[$columnIndex]['data']; // Column name
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue     = $search_arr['value']; // Search value
 
         $departments =  DB::table('departments');
+        
+        // Apply custom search filters
+        if (!empty($searchDepartmentId)) {
+            $departments->where('department_id', 'like', '%' . $searchDepartmentId . '%');
+        }
+        if (!empty($searchDepartmentName)) {
+            $departments->where('department_name', 'like', '%' . $searchDepartmentName . '%');
+        }
+        if (!empty($searchDepartmentYear)) {
+            $departments->where('department_start_date', 'like', '%' . $searchDepartmentYear . '%');
+        }
+
         $totalRecords = $departments->count();
 
-        $totalRecordsWithFilter = $departments->where(function ($query) use ($searchValue) {
-            $query->where('department_id', 'like', '%' . $searchValue . '%');
-            $query->orWhere('department_name', 'like', '%' . $searchValue . '%');
-            $query->orWhere('head_of_department', 'like', '%' . $searchValue . '%');
-            $query->orWhere('department_start_date', 'like', '%' . $searchValue . '%');
-            $query->orWhere('no_of_students', 'like', '%' . $searchValue . '%');
-        })->count();
-
-        $records = $departments->orderBy($columnName, $columnSortOrder)
-            ->where(function ($query) use ($searchValue) {
+        // Apply DataTable search
+        if (!empty($searchValue)) {
+            $departments->where(function ($query) use ($searchValue) {
                 $query->where('department_id', 'like', '%' . $searchValue . '%');
                 $query->orWhere('department_name', 'like', '%' . $searchValue . '%');
                 $query->orWhere('head_of_department', 'like', '%' . $searchValue . '%');
                 $query->orWhere('department_start_date', 'like', '%' . $searchValue . '%');
                 $query->orWhere('no_of_students', 'like', '%' . $searchValue . '%');
-            })
+            });
+        }
+
+        $totalRecordsWithFilter = $departments->count();
+
+        $records = $departments->orderBy($columnName, $columnSortOrder)
             ->skip($start)
             ->take($rowPerPage)
             ->get();

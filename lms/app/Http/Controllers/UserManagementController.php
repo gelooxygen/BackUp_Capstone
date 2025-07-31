@@ -150,33 +150,50 @@ class UserManagementController extends Controller
         $order_arr       = $request->get('order');
         $search_arr      = $request->get('search');
 
+        // Custom search parameters
+        $searchId = $request->get('search_id');
+        $searchName = $request->get('search_name');
+        $searchPhone = $request->get('search_phone');
+
         $columnIndex     = $columnIndex_arr[0]['column']; // Column index
         $columnName      = $columnName_arr[$columnIndex]['data']; // Column name
         $columnSortOrder = $order_arr[0]['dir']; // asc or desc
         $searchValue     = $search_arr['value']; // Search value
 
         $users =  DB::table('users');
+        
+        // Apply custom search filters
+        if (!empty($searchId)) {
+            $users->where('user_id', 'like', '%' . $searchId . '%');
+        }
+        if (!empty($searchName)) {
+            $users->where('name', 'like', '%' . $searchName . '%');
+        }
+        if (!empty($searchPhone)) {
+            $users->where('phone_number', 'like', '%' . $searchPhone . '%');
+        }
+
         $totalRecords = $users->count();
 
-        $totalRecordsWithFilter = $users->where(function ($query) use ($searchValue) {
-            $query->where('name', 'like', '%' . $searchValue . '%');
-            $query->orWhere('email', 'like', '%' . $searchValue . '%');
-            $query->orWhere('position', 'like', '%' . $searchValue . '%');
-            $query->orWhere('phone_number', 'like', '%' . $searchValue . '%');
-            $query->orWhere('status', 'like', '%' . $searchValue . '%');
-        })->count();
-
-        if ($columnName == 'name') {
-            $columnName = 'name';
-        }
-        $records = $users->orderBy($columnName, $columnSortOrder)
-            ->where(function ($query) use ($searchValue) {
+        // Apply DataTable search
+        if (!empty($searchValue)) {
+            $users->where(function ($query) use ($searchValue) {
                 $query->where('name', 'like', '%' . $searchValue . '%');
                 $query->orWhere('email', 'like', '%' . $searchValue . '%');
                 $query->orWhere('position', 'like', '%' . $searchValue . '%');
                 $query->orWhere('phone_number', 'like', '%' . $searchValue . '%');
                 $query->orWhere('status', 'like', '%' . $searchValue . '%');
-            })
+                $query->orWhere('user_id', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+        $totalRecordsWithFilter = $users->count();
+
+        if ($columnName == 'name') {
+            $columnName = 'name';
+        }
+        
+        $records = $users->orderBy($columnName, $columnSortOrder)
             ->skip($start)
             ->take($rowPerPage)
             ->get();
