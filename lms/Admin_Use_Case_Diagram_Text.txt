@@ -1,0 +1,104 @@
+================================================================================
+                    LMS SYSTEM - ADMIN USE CASE DIAGRAM
+================================================================================
+
+🎭 ACTOR:
+• Admin
+
+🧩 USE CASES:
+
+1. Login <<include>> Authenticate Credentials
+2. View Dashboard <<include>> View Stats
+3. User Management
+4. Class & Subject Management
+5. Academic Year & Semester Settings
+6. Attendance Overview
+7. System Settings
+8. Communication Module
+9. Curriculum Management
+10. School Analytics
+11. Calendar Management
+12. Register Users <<extend>> Validate Input
+
+📋 DETAILED USE CASE DESCRIPTIONS:
+
+1. LOGIN
+   - Includes: Authenticate Credentials
+   - Description: Admin logs into the system with username/password
+
+2. VIEW DASHBOARD
+   - Includes: View Stats
+   - Description: Admin views the main dashboard with system statistics
+
+3. USER MANAGEMENT
+   - Create/Edit/Delete Users
+   - Manage User Roles (Admin, Teacher, Student, Parent)
+   - View User Activity Logs
+   - Reset Passwords
+   - Search and Filter Users
+
+4. CLASS & SUBJECT MANAGEMENT
+   - Manage Subjects (Add/Edit/Delete)
+   - Assign Teachers to Subjects
+   - Create Class Schedules
+   - Manage Class Sections
+   - Search and Filter Subjects
+
+5. ACADEMIC YEAR & SEMESTER SETTINGS
+   - Set Academic Year
+   - Configure Semesters
+   - Manage Grading Periods
+   - Set Academic Calendar
+
+6. ATTENDANCE OVERVIEW
+   - View Overall Attendance
+   - Generate Attendance Reports
+   - Monitor Attendance Trends
+   - Export Attendance Data (Excel/PDF)
+
+7. SYSTEM SETTINGS
+   - System Configuration
+   - Email Settings
+   - Notification Preferences
+   - Security Settings
+
+8. COMMUNICATION MODULE
+   - Send Announcements
+   - Internal Messaging
+   - Email Notifications
+   - Auto-reminders
+
+9. CURRICULUM MANAGEMENT
+   - Create Curriculums
+   - Assign Subjects to Curriculums
+   - Manage Learning Objectives
+   - Track Curriculum Progress
+
+10. SCHOOL ANALYTICS
+    - Performance Analytics
+    - Enrollment Statistics
+    - Academic Reports
+    - Data Visualization
+
+11. CALENDAR MANAGEMENT
+    - Create Events
+    - Manage Schedules
+    - Conflict Detection
+    - Calendar Views (Week/Subject/Teacher)
+
+12. REGISTER USERS
+    - Extends: Validate Input
+    - Description: Admin registers new users with proper validation
+
+🔗 RELATIONSHIPS:
+• <<include>>: Login → Authenticate Credentials
+• <<include>>: View Dashboard → View Stats
+• <<extend>>: Register Users → Validate Input
+
+📊 DIAGRAM ELEMENTS:
+• Actor: Admin (stick figure)
+• Use Cases: Ovals
+• System Boundary: Rectangle
+• Relationships: Arrows with stereotypes
+
+================================================================================ 

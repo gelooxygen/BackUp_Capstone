@@ -25,17 +25,15 @@
                         </ul>
                     </li>
                     <li class="submenu">
-                        <a href="#"><i class="fas fa-calendar-alt"></i> <span>Academic Year & Semester</span> <span class="menu-arrow"></span></a>
+                        <a href="#"><i class="fas fa-calendar-alt"></i> <span>Academic Module</span> <span class="menu-arrow"></span></a>
                         <ul>
                             <li><a href="{{ route('academic_years.index') }}">Academic Years</a></li>
                         </ul>
                     </li>
-                    <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Overview</span></a></li>
-                    <li><a href="#"><i class="fas fa-file-alt"></i> <span>Reports & Logs</span></a></li>
-                    <li><a href="{{ route('setting/page') }}"><i class="fas fa-cog"></i> <span>System Settings</span></a></li>
+                    <li><a href="{{ route('calendar.index') }}"><i class="fas fa-calendar"></i> <span>Calendar Management</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
-                        <ul>
+                        <ul>    
                             <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
                             <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
                             <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
@@ -46,7 +44,7 @@
                         <a href="{{ route('curriculum.index') }}"><i class="fas fa-book"></i> <span>Curriculum Management</span></a>
                     </li>
                     <li><a href="{{ route('analytics.admin-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>School Analytics</span></a></li>
-                    <li><a href="{{ route('calendar.index') }}"><i class="fas fa-calendar"></i> <span>Calendar Management</span></a></li>
+                    <li><a href="{{ route('setting/page') }}"><i class="fas fa-cog"></i> <span>System Settings</span></a></li>
                 @endif
 
                 {{-- TEACHER SIDEBAR --}}

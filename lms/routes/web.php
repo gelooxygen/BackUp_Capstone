@@ -356,6 +356,12 @@ Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], f
     // API endpoints for calendar functionality
     Route::get('/available-slots', [App\Http\Controllers\CalendarEventController::class, 'getAvailableSlots'])->name('calendar.available-slots');
     Route::get('/check-conflicts', [App\Http\Controllers\CalendarEventController::class, 'checkConflicts'])->name('calendar.check-conflicts');
+    
+    // Test route for debugging
+    Route::get('/test/events', function() {
+        $events = App\Models\CalendarEvent::with(['subject', 'teacher', 'room'])->take(5)->get();
+        return response()->json($events);
+    })->name('calendar.test-events');
 });
 
 // Schedule Routes

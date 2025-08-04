@@ -9,6 +9,7 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CalendarEventController extends Controller
@@ -24,6 +25,7 @@ class CalendarEventController extends Controller
         $startDate = $request->get('start');
         $endDate = $request->get('end');
 
+        // For debugging, let's get all events without date filtering
         $events = CalendarEvent::with(['subject', 'teacher', 'room'])
             ->when($subjectId, function ($query) use ($subjectId) {
                 return $query->bySubject($subjectId);
@@ -31,15 +33,27 @@ class CalendarEventController extends Controller
             ->when($teacherId, function ($query) use ($teacherId) {
                 return $query->byTeacher($teacherId);
             })
-            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-                return $query->inDateRange($startDate, $endDate);
-            })
+            // Temporarily comment out date filtering for debugging
+            // ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            //     return $query->inDateRange($startDate, $endDate);
+            // })
             ->orderBy('start_time')
             ->get();
 
+        // Debug logging
+        Log::info('Calendar Events Query', [
+            'total_events' => $events->count(),
+            'subject_filter' => $subjectId,
+            'teacher_filter' => $teacherId,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'is_ajax' => $request->ajax(),
+            'request_params' => $request->all()
+        ]);
+
         if ($request->ajax()) {
-            return response()->json($events->map(function ($event) {
-                return [
+            $formattedEvents = $events->map(function ($event) {
+                $formattedEvent = [
                     'id' => $event->id,
                     'title' => $event->title,
                     'start' => $event->start_time->toISOString(),
@@ -54,7 +68,25 @@ class CalendarEventController extends Controller
                         'is_all_day' => $event->is_all_day
                     ]
                 ];
-            }));
+                
+                Log::info('Formatted event', [
+                    'event_id' => $event->id,
+                    'title' => $event->title,
+                    'start' => $formattedEvent['start'],
+                    'end' => $formattedEvent['end'],
+                    'color' => $formattedEvent['color']
+                ]);
+                
+                return $formattedEvent;
+            });
+
+            Log::info('Formatted Events for AJAX', [
+                'events_count' => $formattedEvents->count(),
+                'sample_event' => $formattedEvents->first(),
+                'all_events' => $formattedEvents->toArray()
+            ]);
+
+            return response()->json($formattedEvents);
         }
 
         $subjects = Subject::all();

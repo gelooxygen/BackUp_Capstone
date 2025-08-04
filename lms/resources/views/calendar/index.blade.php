@@ -223,6 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeCalendar() {
     const calendarEl = document.getElementById('calendar');
     
+    console.log('Initializing calendar...');
+    console.log('Calendar element:', calendarEl);
+    
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         headerToolbar: {
@@ -245,6 +248,17 @@ function initializeCalendar() {
                     teacher_id: $('#teacher_filter').val(),
                     event_type: $('#event_type_filter').val()
                 };
+            },
+            failure: function(error) {
+                console.error('Failed to load events:', error);
+                console.error('Error details:', error.responseText);
+            },
+            success: function(events) {
+                console.log('Events loaded successfully:', events);
+                console.log('Number of events:', events.length);
+                if (events.length > 0) {
+                    console.log('Sample event:', events[0]);
+                }
             }
         },
         select: function(arg) {
@@ -263,6 +277,7 @@ function initializeCalendar() {
             updateEventDates(arg.event);
         },
         loading: function(isLoading) {
+            console.log('Calendar loading:', isLoading);
             if (isLoading) {
                 // Show loading indicator
             } else {
@@ -271,7 +286,9 @@ function initializeCalendar() {
         }
     });
     
+    console.log('Calendar object created:', calendar);
     calendar.render();
+    console.log('Calendar rendered');
 }
 
 function setupFilters() {
