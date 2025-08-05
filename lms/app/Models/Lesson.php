@@ -17,7 +17,6 @@ class Lesson extends Model
         'teacher_id',
         'subject_id',
         'section_id',
-        'curriculum_objective_id',
         'academic_year_id',
         'semester_id',
         'lesson_date',
@@ -46,10 +45,7 @@ class Lesson extends Model
         return $this->belongsTo(Section::class);
     }
 
-    public function curriculumObjective()
-    {
-        return $this->belongsTo(CurriculumObjective::class);
-    }
+
 
     public function academicYear()
     {

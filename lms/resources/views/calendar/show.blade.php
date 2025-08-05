@@ -11,13 +11,16 @@
                         <h3 class="page-title">Event Details</h3>
                         <ul class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="{{ route('calendar.index') }}">Calendar</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('calendar.events.list') }}">Calendar Management</a></li>
                             <li class="breadcrumb-item active">Event Details</li>
                         </ul>
                     </div>
                     <div class="col-auto text-end float-end ms-auto download-grp">
                         <a href="{{ route('calendar.edit', $calendarEvent->id) }}" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Event
+                        </a>
+                        <a href="{{ route('calendar.events.list') }}" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left"></i> Back to List
                         </a>
                     </div>
                 </div>
@@ -95,12 +98,12 @@
                                             @if($calendarEvent->room)
                                                 <tr>
                                                     <td><strong>Room:</strong></td>
-                                                    <td>{{ $calendarEvent->room->full_name }}</td>
+                                                    <td>{{ $calendarEvent->room->room_name }}</td>
                                                 </tr>
                                             @endif
                                             <tr>
                                                 <td><strong>Created by:</strong></td>
-                                                <td>{{ $calendarEvent->createdBy->name }}</td>
+                                                <td>{{ $calendarEvent->createdBy->name ?? 'System' }}</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>Created on:</strong></td>
@@ -149,8 +152,8 @@
                                         <i class="fas fa-trash"></i> Delete Event
                                     </button>
                                 </form>
-                                <a href="{{ route('calendar.index') }}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Back to Calendar
+                                <a href="{{ route('calendar.events.list') }}" class="btn btn-secondary">
+                                    <i class="fas fa-list"></i> Back to Events List
                                 </a>
                             </div>
                         </div>
@@ -166,7 +169,9 @@
                                     <div class="related-item">
                                         <h6><i class="fas fa-book text-primary"></i> Subject</h6>
                                         <p class="mb-2">{{ $calendarEvent->subject->subject_name }}</p>
-                                        <small class="text-muted">Class: {{ $calendarEvent->subject->class }}</small>
+                                        @if($calendarEvent->subject->class)
+                                            <small class="text-muted">Class: {{ $calendarEvent->subject->class }}</small>
+                                        @endif
                                     </div>
                                 @endif
 
@@ -174,7 +179,9 @@
                                     <div class="related-item mt-3">
                                         <h6><i class="fas fa-chalkboard-teacher text-success"></i> Teacher</h6>
                                         <p class="mb-2">{{ $calendarEvent->teacher->full_name }}</p>
-                                        <small class="text-muted">{{ $calendarEvent->teacher->qualification }}</small>
+                                        @if($calendarEvent->teacher->qualification)
+                                            <small class="text-muted">{{ $calendarEvent->teacher->qualification }}</small>
+                                        @endif
                                     </div>
                                 @endif
 
@@ -182,7 +189,9 @@
                                     <div class="related-item mt-3">
                                         <h6><i class="fas fa-door-open text-warning"></i> Room</h6>
                                         <p class="mb-2">{{ $calendarEvent->room->room_name }}</p>
-                                        <small class="text-muted">Capacity: {{ $calendarEvent->room->capacity }} students</small>
+                                        @if($calendarEvent->room->capacity)
+                                            <small class="text-muted">Capacity: {{ $calendarEvent->room->capacity }} students</small>
+                                        @endif
                                         @if($calendarEvent->room->location)
                                             <br><small class="text-muted">Location: {{ $calendarEvent->room->location }}</small>
                                         @endif

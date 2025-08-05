@@ -25,7 +25,7 @@ class CalendarEventController extends Controller
         $startDate = $request->get('start');
         $endDate = $request->get('end');
 
-        // For debugging, let's get all events without date filtering
+        // Get events with proper filtering
         $events = CalendarEvent::with(['subject', 'teacher', 'room'])
             ->when($subjectId, function ($query) use ($subjectId) {
                 return $query->bySubject($subjectId);
@@ -33,9 +33,18 @@ class CalendarEventController extends Controller
             ->when($teacherId, function ($query) use ($teacherId) {
                 return $query->byTeacher($teacherId);
             })
-            // Temporarily comment out date filtering for debugging
+            // Temporarily disable date filtering to see all events
             // ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            //     Log::info('Applying date filter', ['start' => $startDate, 'end' => $endDate]);
             //     return $query->inDateRange($startDate, $endDate);
+            // })
+            // // If no date range is provided, show events for the next 6 months (more inclusive)
+            // ->when(!$startDate && !$endDate, function ($query) {
+            //     Log::info('No date range provided, showing next 6 months events');
+            //     return $query->inDateRange(
+            //         now()->subMonths(1)->startOfMonth()->toISOString(),
+            //         now()->addMonths(6)->endOfMonth()->toISOString()
+            //     );
             // })
             ->orderBy('start_time')
             ->get();
@@ -48,7 +57,17 @@ class CalendarEventController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'is_ajax' => $request->ajax(),
-            'request_params' => $request->all()
+            'request_params' => $request->all(),
+            'date_range_applied' => false, // Changed to false since we disabled date filtering
+            'sample_events' => $events->take(3)->map(function($e) {
+                return [
+                    'id' => $e->id,
+                    'title' => $e->title,
+                    'start_time' => $e->start_time->toISOString(),
+                    'end_time' => $e->end_time->toISOString(),
+                    'event_type' => $e->event_type
+                ];
+            })->toArray()
         ]);
 
         if ($request->ajax()) {
@@ -59,6 +78,7 @@ class CalendarEventController extends Controller
                     'start' => $event->start_time->toISOString(),
                     'end' => $event->end_time->toISOString(),
                     'color' => $event->event_color,
+                    'allDay' => $event->is_all_day,
                     'extendedProps' => [
                         'description' => $event->description,
                         'event_type' => $event->event_type,
@@ -194,7 +214,7 @@ class CalendarEventController extends Controller
             ]);
         }
 
-        return redirect()->route('calendar.index')->with('success', 'Event created successfully');
+        return redirect()->route('calendar.index')->with('success', 'Event created successfully')->with('refresh_calendar', true);
     }
 
     /**

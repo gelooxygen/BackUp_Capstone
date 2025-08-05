@@ -18,6 +18,9 @@
                         <a href="{{ route('calendar.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Add Event
                         </a>
+                        <button type="button" class="btn btn-secondary ms-2" onclick="refreshCalendar()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
                     </div>
                 </div>
             </div>
@@ -85,6 +88,10 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Hidden input for session data -->
+            <input type="hidden" id="hasSuccessMessage" value="{{ session('success') ? 'true' : 'false' }}">
+            <input type="hidden" id="refreshCalendar" value="{{ session('refresh_calendar') ? 'true' : 'false' }}">
 
             <!-- Event Legend -->
             <div class="row mt-4">
@@ -216,8 +223,22 @@ let calendar;
 let selectedEvent = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Starting calendar initialization');
+    
+    // Initialize calendar
     initializeCalendar();
     setupFilters();
+    
+    // Check if calendar needs to be refreshed after event creation
+    if (document.getElementById('refreshCalendar').value === 'true') {
+        console.log('Refresh calendar flag detected, refreshing calendar...');
+        setTimeout(function() {
+            if (calendar) {
+                calendar.refetchEvents();
+                console.log('Calendar refreshed after event creation');
+            }
+        }, 1500);
+    }
 });
 
 function initializeCalendar() {
@@ -225,6 +246,20 @@ function initializeCalendar() {
     
     console.log('Initializing calendar...');
     console.log('Calendar element:', calendarEl);
+    
+    if (!calendarEl) {
+        console.error('Calendar element not found!');
+        return;
+    }
+    
+    // Check if FullCalendar is loaded
+    if (typeof FullCalendar === 'undefined') {
+        console.error('FullCalendar library is not loaded!');
+        alert('FullCalendar library failed to load. Please refresh the page.');
+        return;
+    }
+    
+    console.log('FullCalendar library is loaded successfully');
     
     calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -243,11 +278,13 @@ function initializeCalendar() {
             url: '{{ route("calendar.index") }}',
             method: 'GET',
             extraParams: function() {
-                return {
+                const params = {
                     subject_id: $('#subject_filter').val(),
                     teacher_id: $('#teacher_filter').val(),
                     event_type: $('#event_type_filter').val()
                 };
+                console.log('Sending parameters to server:', params);
+                return params;
             },
             failure: function(error) {
                 console.error('Failed to load events:', error);
@@ -258,6 +295,11 @@ function initializeCalendar() {
                 console.log('Number of events:', events.length);
                 if (events.length > 0) {
                     console.log('Sample event:', events[0]);
+                    console.log('First event title:', events[0].title);
+                    console.log('First event start:', events[0].start);
+                    console.log('First event end:', events[0].end);
+                } else {
+                    console.log('No events found in the current date range');
                 }
             }
         },
@@ -278,17 +320,18 @@ function initializeCalendar() {
         },
         loading: function(isLoading) {
             console.log('Calendar loading:', isLoading);
-            if (isLoading) {
-                // Show loading indicator
-            } else {
-                // Hide loading indicator
-            }
         }
     });
     
     console.log('Calendar object created:', calendar);
-    calendar.render();
-    console.log('Calendar rendered');
+    
+    try {
+        calendar.render();
+        console.log('Calendar rendered successfully');
+    } catch (error) {
+        console.error('Error rendering calendar:', error);
+        alert('Error rendering calendar: ' + error.message);
+    }
 }
 
 function setupFilters() {
@@ -299,6 +342,13 @@ function setupFilters() {
     $('#subject_filter, #teacher_filter, #event_type_filter').on('change', function() {
         calendar.refetchEvents();
     });
+}
+
+function refreshCalendar() {
+    console.log('Manual refresh triggered');
+    if (calendar) {
+        calendar.refetchEvents();
+    }
 }
 
 function showEventDetails(event) {

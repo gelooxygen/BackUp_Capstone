@@ -189,13 +189,13 @@ Route::get('attendance/export', [App\Http\Controllers\AttendanceController::clas
 Route::get('attendance/student', [App\Http\Controllers\AttendanceController::class, 'studentView'])->name('attendance.student');
 Route::get('attendance/parent', [App\Http\Controllers\AttendanceController::class, 'parentView'])->name('attendance.parent');
 
-// Curriculum Management
-Route::resource('curriculum', App\Http\Controllers\CurriculumController::class);
-Route::get('curriculum/{id}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjectsForm'])->name('curriculum.assignSubjectsForm');
-Route::post('curriculum/{id}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjects'])->name('curriculum.assignSubjects');
-
 // Admin-only routes
 Route::group(['middleware' => ['role:Admin']], function () {
+    // Curriculum Management (Admin Only)
+    Route::resource('curriculum', App\Http\Controllers\CurriculumController::class);
+    Route::get('curriculum/{curriculum}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjectsForm'])->name('curriculum.assignSubjectsForm');
+    Route::post('curriculum/{curriculum}/assign-subjects', [App\Http\Controllers\CurriculumController::class, 'assignSubjects'])->name('curriculum.assignSubjects');
+    
     // ----------------------- Grading Module Routes (Admin Access) -----------------------------//
     Route::group(['prefix' => 'admin/grading'], function () {
         // GPA and Ranking (Admin can view all)
@@ -297,7 +297,10 @@ Route::group(['middleware' => ['role:Teacher']], function () {
 
 // Student-only routes
 Route::group(['middleware' => ['role:Student']], function () {
-    // Place student-only routes here
+    // My Classes route
+    Route::get('/my-classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.my-classes');
+    // Class detail route
+    Route::get('/class/{enrollmentId}', [App\Http\Controllers\StudentController::class, 'classDetail'])->name('student.class.detail');
 });
 
 // Parent-only routes
@@ -363,6 +366,79 @@ Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], f
         return response()->json($events);
     })->name('calendar.test-events');
 });
+
+// Test route for calendar events
+Route::get('/calendar/test/events', function() {
+    $events = App\Models\CalendarEvent::with(['subject', 'teacher', 'room'])->get();
+    return response()->json([
+        'total_events' => $events->count(),
+        'events' => $events->map(function($event) {
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'start_time' => $event->start_time->toISOString(),
+                'end_time' => $event->end_time->toISOString(),
+                'event_type' => $event->event_type,
+                'subject' => $event->subject?->subject_name,
+                'teacher' => $event->teacher?->full_name
+            ];
+        })
+    ]);
+});
+
+// Test calendar page
+Route::get('/calendar/test', function() {
+    return view('calendar.test');
+});
+
+// Calendar events list route
+Route::get('/calendar/events/list', function(\Illuminate\Http\Request $request) {
+    $query = App\Models\CalendarEvent::with(['subject', 'teacher', 'room']);
+    
+    // Filter by event type
+    if ($request->filled('event_type')) {
+        $query->where('event_type', $request->event_type);
+    }
+    
+    // Filter by date range
+    if ($request->filled('date_range')) {
+        switch ($request->date_range) {
+            case 'today':
+                $query->whereDate('start_time', today());
+                break;
+            case 'week':
+                $query->whereBetween('start_time', [now()->startOfWeek(), now()->endOfWeek()]);
+                break;
+            case 'month':
+                $query->whereMonth('start_time', now()->month);
+                break;
+            case 'future':
+                $query->where('start_time', '>', now());
+                break;
+            case 'past':
+                $query->where('start_time', '<', now());
+                break;
+        }
+    }
+    
+    // Search functionality
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhereHas('subject', function($sq) use ($search) {
+                  $sq->where('subject_name', 'like', "%{$search}%");
+              })
+              ->orWhereHas('teacher', function($sq) use ($search) {
+                  $sq->where('full_name', 'like', "%{$search}%");
+              });
+        });
+    }
+    
+    $events = $query->orderBy('start_time', 'desc')->paginate(15);
+    return view('calendar.events-list', compact('events'));
+})->name('calendar.events.list');
 
 // Schedule Routes
 Route::group(['prefix' => 'schedule', 'middleware' => ['role:Student,Admin,Teacher,Parent']], function () {

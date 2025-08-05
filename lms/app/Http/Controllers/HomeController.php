@@ -44,7 +44,20 @@ class HomeController extends Controller
     /** student dashboard */
     public function studentDashboardIndex()
     {
-        return view('dashboard.student_dashboard');
+        $user = auth()->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+        
+        // Get student's enrollments with related data
+        $enrollments = $student->enrollments()
+            ->with(['subject', 'academicYear', 'semester'])
+            ->where('status', 'active')
+            ->get();
+        
+        return view('dashboard.student_dashboard', compact('student', 'enrollments'));
     }
 
     /** admin dashboard */

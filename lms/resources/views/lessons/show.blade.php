@@ -83,18 +83,7 @@
                                 </div>
                             </div>
 
-                            <!-- Curriculum Objective -->
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h5><i class="fas fa-target me-2"></i>Curriculum Objective</h5>
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h6 class="card-title">{{ $lesson->curriculumObjective->code }} - {{ $lesson->curriculumObjective->title }}</h6>
-                                            <p class="card-text text-muted">{{ $lesson->curriculumObjective->description }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
 
                             <!-- Lesson Materials -->
                             @if($lesson->file_path)

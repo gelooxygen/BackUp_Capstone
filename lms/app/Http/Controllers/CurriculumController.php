@@ -34,52 +34,46 @@ class CurriculumController extends Controller
         return redirect()->route('curriculum.index')->with('success', 'Curriculum created successfully.');
     }
 
-    public function show($id)
+    public function show(Curriculum $curriculum)
     {
-        $curriculum = Curriculum::with('subjects')->findOrFail($id);
+        $curriculum->load('subjects');
         $allSubjects = Subject::orderBy('subject_name')->get();
         return view('curriculum.show', compact('curriculum', 'allSubjects'));
     }
 
-    public function edit($id)
+    public function edit(Curriculum $curriculum)
     {
-        $curriculum = Curriculum::findOrFail($id);
         return view('curriculum.edit', compact('curriculum'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Curriculum $curriculum)
     {
         $request->validate([
             'grade_level' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        $curriculum = Curriculum::findOrFail($id);
         $curriculum->update($request->only(['grade_level', 'description']));
         return redirect()->route('curriculum.index')->with('success', 'Curriculum updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(Curriculum $curriculum)
     {
-        $curriculum = Curriculum::findOrFail($id);
         $curriculum->delete();
         return redirect()->route('curriculum.index')->with('success', 'Curriculum deleted successfully.');
     }
 
-    public function assignSubjectsForm($id)
+    public function assignSubjectsForm(Curriculum $curriculum)
     {
-        $curriculum = Curriculum::with('subjects')->findOrFail($id);
-        $this->authorize('update', $curriculum);
+        $curriculum->load('subjects');
         $subjects = Subject::orderBy('subject_name')->get();
         $assigned = $curriculum->subjects->pluck('id')->toArray();
         return view('curriculum.assign_subjects', compact('curriculum', 'subjects', 'assigned'));
     }
 
-    public function assignSubjects(Request $request, $id)
+    public function assignSubjects(Request $request, Curriculum $curriculum)
     {
-        $curriculum = Curriculum::findOrFail($id);
-        $this->authorize('update', $curriculum);
         $subjectIds = $request->input('subject_ids', []);
         $curriculum->subjects()->sync($subjectIds);
-        return redirect()->route('curriculum.show', $id)->with('success', 'Subjects assigned successfully.');
+        return redirect()->route('curriculum.show', $curriculum)->with('success', 'Subjects assigned successfully.');
     }
 }

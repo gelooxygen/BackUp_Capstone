@@ -146,20 +146,7 @@
                                                 @error('semester_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
-                                        <div class="col-lg-4 col-md-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Curriculum Objective</label>
-                                                <select class="form-control @error('curriculum_objective_id') is-invalid @enderror" id="curriculum_objective_id" name="curriculum_objective_id" required>
-                                                    <option value="">Select Curriculum Objective</option>
-                                                    @foreach($curriculumObjectives as $objective)
-                                                        <option value="{{ $objective->id }}" {{ old('curriculum_objective_id', $lesson->curriculum_objective_id) == $objective->id ? 'selected' : '' }}>
-                                                            {{ $objective->code }} - {{ Str::limit($objective->title, 50) }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('curriculum_objective_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                            </div>
-                                        </div>
+
                                     </div>
                                 </div>
 
@@ -217,12 +204,7 @@
                                                             <span class="info-value" id="previewPeriod">-</span>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-3">
-                                                        <div class="info-item">
-                                                            <label class="info-label">Curriculum Code:</label>
-                                                            <span class="info-value" id="previewCurriculum">-</span>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -535,7 +517,7 @@ $(document).ready(function() {
         const sectionSelect = $('#section_id option:selected');
         const academicYearSelect = $('#academic_year_id option:selected');
         const semesterSelect = $('#semester_id option:selected');
-        const curriculumSelect = $('#curriculum_objective_id option:selected');
+
         
         $('#previewSubject').text(subjectSelect.val() ? subjectSelect.text() : '-');
         $('#previewSection').text(sectionSelect.val() ? sectionSelect.text() : '-');
@@ -544,11 +526,11 @@ $(document).ready(function() {
                 ? `${academicYearSelect.text()} - ${semesterSelect.text()}` 
                 : '-'
         );
-        $('#previewCurriculum').text(curriculumSelect.val() ? curriculumSelect.text().split(' - ')[0] : '-');
+
     }
     
     // Bind preview updates to form changes
-    $('#subject_id, #section_id, #academic_year_id, #semester_id, #curriculum_objective_id').on('change', updatePreview);
+    $('#subject_id, #section_id, #academic_year_id, #semester_id').on('change', updatePreview);
     $('#title, #description').on('input', updatePreview);
     
     // Form validation
@@ -557,12 +539,12 @@ $(document).ready(function() {
         const description = $('#description').val();
         const subjectId = $('#subject_id').val();
         const sectionId = $('#section_id').val();
-        const curriculumObjectiveId = $('#curriculum_objective_id').val();
+
         const academicYearId = $('#academic_year_id').val();
         const semesterId = $('#semester_id').val();
         const lessonDate = $('#lesson_date').val();
         
-        if (!title || !description || !subjectId || !sectionId || !curriculumObjectiveId || !academicYearId || !semesterId || !lessonDate) {
+        if (!title || !description || !subjectId || !sectionId || !academicYearId || !semesterId || !lessonDate) {
             e.preventDefault();
             alert('Please fill in all required fields.');
             return false;

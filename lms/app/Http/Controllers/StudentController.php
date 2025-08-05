@@ -207,7 +207,53 @@ class StudentController extends Controller
     /** student profile page */
     public function studentProfile($id)
     {
-        $studentProfile = Student::where('id',$id)->first();
-        return view('student.student-profile',compact('studentProfile'));
+        $student = Student::findOrFail($id);
+        return view('student.student-profile', compact('student'));
+    }
+
+    /** student my classes page */
+    public function myClasses()
+    {
+        $user = auth()->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+        
+        // Get student's enrollments with related data
+        $enrollments = $student->enrollments()
+            ->with(['subject', 'academicYear', 'semester'])
+            ->where('status', 'active')
+            ->get();
+        
+        return view('student.my-classes', compact('student', 'enrollments'));
+    }
+
+    /** student class detail page */
+    public function classDetail($enrollmentId)
+    {
+        $user = auth()->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+        
+        // Get the specific enrollment with all related data
+        $enrollment = $student->enrollments()
+            ->with(['subject', 'academicYear', 'semester'])
+            ->where('id', $enrollmentId)
+            ->where('status', 'active')
+            ->first();
+        
+        if (!$enrollment) {
+            return redirect()->back()->with('error', 'Class not found or access denied.');
+        }
+        
+        // Get the active tab from request
+        $activeTab = request('tab', 'assignments');
+        
+        return view('student.class-detail', compact('student', 'enrollment', 'activeTab'));
     }
 }

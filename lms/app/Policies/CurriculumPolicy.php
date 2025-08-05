@@ -13,7 +13,7 @@ class CurriculumPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -21,7 +21,7 @@ class CurriculumPolicy
      */
     public function view(User $user, Curriculum $curriculum): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -29,7 +29,7 @@ class CurriculumPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -37,7 +37,7 @@ class CurriculumPolicy
      */
     public function update(User $user, Curriculum $curriculum): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -45,7 +45,7 @@ class CurriculumPolicy
      */
     public function delete(User $user, Curriculum $curriculum): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -53,7 +53,7 @@ class CurriculumPolicy
      */
     public function restore(User $user, Curriculum $curriculum): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
     /**
@@ -61,9 +61,12 @@ class CurriculumPolicy
      */
     public function forceDelete(User $user, Curriculum $curriculum): bool
     {
-        return false;
+        return $user->role_name === 'Admin';
     }
 
+    /**
+     * Perform pre-authorization checks.
+     */
     public function before($user, $ability)
     {
         // Only allow admins

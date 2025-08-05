@@ -30,7 +30,13 @@
                             <li><a href="{{ route('academic_years.index') }}">Academic Years</a></li>
                         </ul>
                     </li>
-                    <li><a href="{{ route('calendar.index') }}"><i class="fas fa-calendar"></i> <span>Calendar Management</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-calendar"></i> <span>Calendar Management</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('calendar.events.list') }}"><i class="fas fa-list"></i> <span>All Events</span></a></li>
+                            <li><a href="{{ route('calendar.create') }}"><i class="fas fa-plus"></i> <span>Create Event</span></a></li>
+                        </ul>
+                    </li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
                         <ul>    
@@ -75,9 +81,14 @@
                         <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
                     </li> 
                     <li><a href="{{ route('analytics.teacher-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>Performance Analytics</span></a></li>
-                    <li><a href="{{ route('calendar.index') }}"><i class="fas fa-calendar"></i> <span>Calendar Management</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-calendar"></i> <span>Calendar Management</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('calendar.events.list') }}"><i class="fas fa-list"></i> <span>All Events</span></a></li>
+                            <li><a href="{{ route('calendar.create') }}"><i class="fas fa-plus"></i> <span>Create Event</span></a></li>
+                        </ul>
+                    </li>
                     <li><a href="#"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
-                    <li><a href="#"><i class="fas fa-upload"></i> <span>Upload Lesson Materials</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
                         <ul>
@@ -95,8 +106,28 @@
                     <li class="submenu">
                         <a href="{{ route('student/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-graduation-cap"></i> <span>My Classes</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            @php
+                                $user = auth()->user();
+                                $student = $user->student;
+                                $enrollments = $student ? $student->enrollments()->with(['subject'])->where('status', 'active')->get() : collect();
+                            @endphp
+                            @foreach($enrollments as $enrollment)
+                                <li>
+                                    <a href="{{ route('student.class.detail', $enrollment->id) }}">
+                                        <i class="fas fa-book"></i> 
+                                        <span>#{{ $enrollment->subject->id }}: {{ $enrollment->subject->subject_code ?? 'SUB' . $enrollment->subject->id }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                            @if($enrollments->count() == 0)
+                                <li><a href="#"><i class="fas fa-info-circle"></i> <span>No classes enrolled</span></a></li>
+                            @endif
+                        </ul>
+                    </li>
                     <li><a href="{{ route('student.my-schedule') }}"><i class="fas fa-calendar-alt"></i> <span>My Schedule</span></a></li>
-                    <li><a href="#"><i class="fas fa-download"></i> <span>Learning Materials</span></a></li>
                     <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
                     <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
                     <li class="submenu">

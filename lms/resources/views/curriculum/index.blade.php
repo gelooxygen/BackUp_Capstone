@@ -14,14 +14,16 @@
         @endif
         <div class="card">
             <div class="card-body">
-                <a href="{{ route('curriculum.create') }}" class="btn btn-primary mb-3">Add Curriculum</a>
+                <a href="{{ route('curriculum.create') }}" class="btn btn-primary mb-3">
+                    <i class="fas fa-plus"></i> Add Curriculum
+                </a>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Grade Level</th>
                             <th>Description</th>
                             <th>Subjects</th>
-                            <th>Actions</th>
+                            <th width="200">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -35,14 +37,27 @@
                                 @endforeach
                             </td>
                             <td>
-                                <a href="{{ route('curriculum.show', $curriculum->id) }}" class="btn btn-sm btn-info">View</a>
-                                <a href="{{ route('curriculum.edit', $curriculum->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                                <form action="{{ route('curriculum.destroy', $curriculum->id) }}" method="POST" style="display:inline-block;">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('curriculum.show', $curriculum->id) }}" class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('curriculum.edit', $curriculum->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ route('curriculum.assignSubjectsForm', $curriculum->id) }}" class="btn btn-sm btn-primary" title="Assign Subjects">
+                                        <i class="fas fa-link"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn" title="Delete" 
+                                            data-id="{{ $curriculum->id }}" data-grade="{{ $curriculum->grade_level }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden form for delete -->
+                                <form id="delete-form-{{ $curriculum->id }}" action="{{ route('curriculum.destroy', $curriculum->id) }}" method="POST" style="display:none;">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                                 </form>
-                                <a href="{{ route('curriculum.assignSubjectsForm', $curriculum->id) }}" class="btn btn-sm btn-primary">Assign Subjects</a>
                             </td>
                         </tr>
                         @endforeach
@@ -52,4 +67,20 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    document.querySelectorAll('.delete-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            var grade = this.getAttribute('data-grade');
+            
+            if (confirm('Are you sure you want to delete the curriculum "' + grade + '"? This action cannot be undone.')) {
+                document.getElementById('delete-form-' + id).submit();
+            }
+        });
+    });
+});
+</script>
 @endsection 
