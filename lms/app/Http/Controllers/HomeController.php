@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Student;
 
 class HomeController extends Controller
 {
@@ -26,7 +27,7 @@ class HomeController extends Controller
     /** home dashboard */
     public function index()
     {
-        return view('dashboard.home');
+        return $this->dashboard();
     }
 
     /** profile user */
@@ -48,7 +49,12 @@ class HomeController extends Controller
         $student = $user->student;
         
         if (!$student) {
-            return redirect()->back()->with('error', 'Student profile not found.');
+            // Try to find student by user_id as fallback
+            $student = Student::where('user_id', $user->user_id)->first();
+            
+            if (!$student) {
+                return redirect()->back()->with('error', 'Student profile not found. Please contact administrator.');
+            }
         }
         
         // Get student's enrollments with related data
@@ -83,7 +89,24 @@ class HomeController extends Controller
         } elseif ($user->role_name === User::ROLE_TEACHER) {
             return view('dashboard.teacher_dashboard');
         } elseif ($user->role_name === User::ROLE_STUDENT) {
-            return view('dashboard.student_dashboard');
+            $student = $user->student;
+            
+            if (!$student) {
+                // Try to find student by user_id as fallback
+                $student = Student::where('user_id', $user->user_id)->first();
+                
+                if (!$student) {
+                    return redirect()->back()->with('error', 'Student profile not found. Please contact administrator.');
+                }
+            }
+            
+            // Get student's enrollments with related data
+            $enrollments = $student->enrollments()
+                ->with(['subject', 'academicYear', 'semester'])
+                ->where('status', 'active')
+                ->get();
+            
+            return view('dashboard.student_dashboard', compact('student', 'enrollments'));
         } elseif ($user->role_name === User::ROLE_PARENT) {
             return app(\App\Http\Controllers\ParentController::class)->dashboard(request());
         }

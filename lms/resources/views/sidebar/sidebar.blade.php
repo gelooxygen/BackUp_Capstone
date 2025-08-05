@@ -80,7 +80,6 @@
                     <li>
                         <a href="{{ route('attendance.index') }}"><i class="fas fa-calendar-check"></i> <span>Attendance</span></a>
                     </li> 
-                    <li><a href="{{ route('analytics.teacher-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>Performance Analytics</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-calendar"></i> <span>Calendar Management</span> <span class="menu-arrow"></span></a>
                         <ul>
@@ -128,8 +127,8 @@
                         </ul>
                     </li>
                     <li><a href="{{ route('student.my-schedule') }}"><i class="fas fa-calendar-alt"></i> <span>My Schedule</span></a></li>
-                    <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
-                    <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
+                    <li><a href="{{ route('student.grades') }}"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
+                    <li><a href="{{ route('student.attendance') }}"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
                         <ul>

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Brian2694\Toastr\Facades\Toastr;
@@ -255,5 +255,82 @@ class StudentController extends Controller
         $activeTab = request('tab', 'assignments');
         
         return view('student.class-detail', compact('student', 'enrollment', 'activeTab'));
+    }
+
+    /** student grades page */
+    public function grades()
+    {
+        $user = auth()->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+        
+        // Get student's grades with related data
+        $grades = $student->grades()
+            ->with(['subject', 'teacher', 'component', 'academicYear', 'semester'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get GPA records
+        $gpaRecords = $student->gpaRecords()
+            ->with(['academicYear', 'semester'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get grade alerts
+        $gradeAlerts = $student->gradeAlerts()
+            ->with(['subject'])
+            ->where('is_resolved', false)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('student.grades', compact('student', 'grades', 'gpaRecords', 'gradeAlerts'));
+    }
+
+    /** student attendance page */
+    public function attendance()
+    {
+        $user = auth()->user();
+        $student = $user->student;
+        
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student profile not found.');
+        }
+        
+        // Get student's subjects
+        $subjects = $student->subjects;
+        
+        // Get attendance records for current month
+        $month = request('month', now()->format('Y-m'));
+        $year = substr($month, 0, 4);
+        $monthNum = substr($month, 5, 2);
+        
+        $query = \App\Models\Attendance::where('student_id', $student->id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $monthNum)
+            ->with(['subject', 'teacher']);
+        
+        if ($subjectId = request('subject_id')) {
+            $query->where('subject_id', $subjectId);
+        }
+        
+        $attendances = $query->orderBy('date', 'desc')->get();
+        
+        // Calculate summary
+        $total = $attendances->count();
+        $present = $attendances->where('status', 'present')->count();
+        $absent = $total - $present;
+        $percentage = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+        
+        $summary = [
+            'total' => $total,
+            'present' => $present,
+            'absent' => $absent,
+            'percentage' => $percentage,
+        ];
+        
+        return view('student.attendance', compact('student', 'subjects', 'attendances', 'summary'));
     }
 }

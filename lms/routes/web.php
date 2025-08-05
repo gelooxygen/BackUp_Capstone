@@ -184,7 +184,9 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 Route::resource('academic_years', AcademicYearController::class)->middleware('auth');
 Route::resource('enrollments', EnrollmentController::class)->middleware('auth');
 Route::resource('sections', SectionController::class)->middleware('auth');
-Route::resource('attendance', AttendanceController::class);
+// Attendance routes (available to teachers and admins)
+Route::get('teacher/attendance', [App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');
+Route::resource('teacher/attendance', AttendanceController::class)->except(['index']);
 Route::get('attendance/export', [App\Http\Controllers\AttendanceController::class, 'export'])->name('attendance.export');
 Route::get('attendance/student', [App\Http\Controllers\AttendanceController::class, 'studentView'])->name('attendance.student');
 Route::get('attendance/parent', [App\Http\Controllers\AttendanceController::class, 'parentView'])->name('attendance.parent');
@@ -301,6 +303,10 @@ Route::group(['middleware' => ['role:Student']], function () {
     Route::get('/my-classes', [App\Http\Controllers\StudentController::class, 'myClasses'])->name('student.my-classes');
     // Class detail route
     Route::get('/class/{enrollmentId}', [App\Http\Controllers\StudentController::class, 'classDetail'])->name('student.class.detail');
+    // Student grades route
+    Route::get('/grades', [App\Http\Controllers\StudentController::class, 'grades'])->name('student.grades');
+    // Student attendance route
+    Route::get('/attendance', [App\Http\Controllers\StudentController::class, 'attendance'])->name('student.attendance');
 });
 
 // Parent-only routes
