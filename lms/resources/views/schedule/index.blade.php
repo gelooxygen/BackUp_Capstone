@@ -71,7 +71,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <h5>Schedule Summary</h5>
-                                    <p><strong>Total Classes:</strong> {{ $weeklySchedule->flatten()->count() }}</p>
+                                    <p><strong>Total Classes:</strong> {{ collect($weeklySchedule)->flatten()->count() }}</p>
                                     <p><strong>Today's Classes:</strong> {{ $todaySchedule->count() }}</p>
                                     <p><strong>Active Schedule:</strong> Yes</p>
                                 </div>
@@ -231,7 +231,7 @@
                         <div class="card-body">
                             <div class="row">
                                 @php
-                                    $subjects = $weeklySchedule->flatten()->pluck('subject')->unique();
+                                    $subjects = collect($weeklySchedule)->flatten()->pluck('subject')->unique();
                                 @endphp
                                 @foreach($subjects as $subject)
                                     <div class="col-md-3 col-sm-6 mb-2">

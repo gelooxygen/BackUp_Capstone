@@ -87,7 +87,7 @@
                             <li><a href="{{ route('calendar.create') }}"><i class="fas fa-plus"></i> <span>Create Event</span></a></li>
                         </ul>
                     </li>
-                    <li><a href="#"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
+                    <li><a href="{{ route('teacher.classes') }}"><i class="fas fa-users"></i> <span>My Class List</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>
                         <ul>
@@ -96,7 +96,6 @@
                             <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
                         </ul>
                     </li>
-                    <li><a href="#"><i class="fas fa-user"></i> <span>Student Profiles</span></a></li>
                    
                 @endif
 
@@ -142,12 +141,23 @@
 
                 {{-- PARENT SIDEBAR --}}
                 @if (Session::get('role_name') === 'Parent')
+                    @php
+                        $parent = auth()->user();
+                        $children = \App\Models\Student::where('parent_email', $parent->email)->get();
+                        $selectedChild = $children->first();
+                    @endphp
                     <li class="submenu">
                         <a href="{{ route('parent/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
-                    <li><a href="#"><i class="fas fa-user"></i> <span>Child Profile</span></a></li>
-                    <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance</span></a></li>
-                    <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
+                    @if($selectedChild)
+                        <li><a href="{{ route('parent.child.profile', $selectedChild->id) }}"><i class="fas fa-user"></i> <span>Child Profile</span></a></li>
+                        <li><a href="{{ route('parent.child.attendance', $selectedChild->id) }}"><i class="fas fa-user-check"></i> <span>Attendance</span></a></li>
+                        <li><a href="{{ route('parent.child.grades', $selectedChild->id) }}"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
+                    @else
+                        <li><a href="#"><i class="fas fa-user"></i> <span>Child Profile</span></a></li>
+                        <li><a href="#"><i class="fas fa-user-check"></i> <span>Attendance</span></a></li>
+                        <li><a href="#"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
+                    @endif
                     <li><a href="{{ route('parent.schedule') }}"><i class="fas fa-calendar-alt"></i> <span>Class Schedule</span></a></li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-bullhorn"></i> <span>Communication</span> <span class="menu-arrow"></span></a>

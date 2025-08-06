@@ -33,7 +33,7 @@
                         </div>
                         <div class="report-content">
                             <h6 class="text-muted mb-1">Total Students</h6>
-                            <h3 class="text-dark fw-bold mb-0">50,055</h3>
+                            <h3 class="text-dark fw-bold mb-0">{{ number_format($totalStudents) }}</h3>
                         </div>
                     </div>
                 </div>
@@ -42,11 +42,11 @@
                 <div class="card card-report shadow-hover transition-all">
                     <div class="card-body d-flex align-items-center">
                         <div class="report-icon bg-success-soft rounded-circle me-3">
-                            <i class="fas fa-trophy text-success fs-4"></i>
+                            <i class="fas fa-chalkboard-teacher text-success fs-4"></i>
                         </div>
                         <div class="report-content">
-                            <h6 class="text-muted mb-1">Total Awards</h6>
-                            <h3 class="text-dark fw-bold mb-0">50+</h3>
+                            <h6 class="text-muted mb-1">Total Teachers</h6>
+                            <h3 class="text-dark fw-bold mb-0">{{ number_format($totalTeachers) }}</h3>
                         </div>
                     </div>
                 </div>
@@ -55,11 +55,11 @@
                 <div class="card card-report shadow-hover transition-all">
                     <div class="card-body d-flex align-items-center">
                         <div class="report-icon bg-warning-soft rounded-circle me-3">
-                            <i class="fas fa-building text-warning fs-4"></i>
+                            <i class="fas fa-book text-warning fs-4"></i>
                         </div>
                         <div class="report-content">
-                            <h6 class="text-muted mb-1">Total Departments</h6>
-                            <h3 class="text-dark fw-bold mb-0">30+</h3>
+                            <h6 class="text-muted mb-1">Total Subjects</h6>
+                            <h3 class="text-dark fw-bold mb-0">{{ number_format($totalSubjects) }}</h3>
                         </div>
                     </div>
                 </div>
@@ -67,12 +67,12 @@
             <div class="col-xl-3 col-sm-6 col-12">
                 <div class="card card-report shadow-hover transition-all">
                     <div class="card-body d-flex align-items-center">
-                        <div class="report-icon bg-danger-soft rounded-circle me-3">
-                            <i class="fas fa-dollar-sign text-danger fs-4"></i>
+                        <div class="report-icon bg-info-soft rounded-circle me-3">
+                            <i class="fas fa-calendar-check text-info fs-4"></i>
                         </div>
                         <div class="report-content">
-                            <h6 class="text-muted mb-1">Total Revenue</h6>
-                            <h3 class="text-dark fw-bold mb-0">$505</h3>
+                            <h6 class="text-muted mb-1">Attendance Rate</h6>
+                            <h3 class="text-dark fw-bold mb-0">{{ $attendancePercentage }}%</h3>
                         </div>
                     </div>
                 </div>
@@ -154,81 +154,30 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @forelse($topStudents as $gpaRecord)
                                     <tr>
                                         <td class="text-nowrap">
-                                            <div>PRE2209</div>
+                                            <div>{{ $gpaRecord->student->admission_id ?? 'STU' . $gpaRecord->student->id }}</div>
                                         </td>   
                                         <td class="text-nowrap">
-                                            <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
+                                            <a href="#">
+                                                <img class="rounded-circle" src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> 
+                                                {{ $gpaRecord->student->first_name ?? 'Student' }} {{ $gpaRecord->student->last_name ?? '' }}
                                             </a>
                                         </td>
-                                        <td class="text-center">1185</td>
-                                        <td class="text-center">98%</td>
+                                        <td class="text-center">{{ $gpaRecord->total_grade_points ?? 'N/A' }}</td>
+                                        <td class="text-center">{{ $gpaRecord->gpa ?? 'N/A' }}</td>
                                         <td class="text-end">
-                                            <div>2019</div>
+                                            <div>{{ $gpaRecord->academicYear->name ?? 'N/A' }}</div>
                                         </td>
                                     </tr>
+                                    @empty
                                     <tr>
-                                        <td class="text-nowrap">
-                                            <div>PRE1245</div>
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
-                                            </a>
-                                        </td>
-                                        <td class="text-center">1195</td>
-                                        <td class="text-center">99.5%</td>
-                                        <td class="text-end">
-                                            <div>2018</div>
+                                        <td colspan="5" class="text-center text-muted">
+                                            <i class="fas fa-info-circle me-2"></i>No GPA records available
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="text-nowrap">
-                                            <div>PRE1625</div>
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
-                                            </a>
-                                        </td>
-                                        <td class="text-center">1196</td>
-                                        <td class="text-center">99.6%</td>
-                                        <td class="text-end">
-                                            <div>2017</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-nowrap">
-                                            <div>PRE2516</div>
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
-                                            </a>
-                                        </td>
-                                        <td class="text-center">1187</td>
-                                        <td class="text-center">98.2%</td>
-                                        <td class="text-end">
-                                            <div>2016</div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-nowrap">
-                                            <div>PRE2209</div>
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <a href="profile.html">
-                                                <img class="rounded-circle"src="{{ URL::to('assets/img/profiles/avatar-01.jpg') }}" width="25" alt="Star Students"> Soeng Souy
-                                            </a>
-                                        </td>
-                                        <td class="text-center">1185</td>
-                                        <td class="text-center">98%</td>
-                                        <td class="text-end">
-                                            <div>2015</div>
-                                        </td>
-                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -248,53 +197,10 @@
                     </div>
                     <div class="card-body">
                         <div class="activity-groups">
-                            <div class="activity-awards">
-                                <div class="award-boxs">
-                                    <img src="assets/img/icons/award-icon-01.svg" alt="Award">
-                                </div>
-                                <div class="award-list-outs">
-                                    <h4>1st place in "Chess”</h4>
-                                    <h5>John Doe won 1st place in "Chess"</h5>
-                                </div>
-                                <div class="award-time-list">
-                                    <span>1 Day ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-awards">
-                                <div class="award-boxs">
-                                    <img src="assets/img/icons/award-icon-02.svg" alt="Award">
-                                </div>
-                                <div class="award-list-outs">
-                                    <h4>Participated in "Carrom"</h4>
-                                    <h5>Justin Lee participated in "Carrom"</h5>
-                                </div>
-                                <div class="award-time-list">
-                                    <span>2 hours ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-awards">
-                                <div class="award-boxs">
-                                    <img src="assets/img/icons/award-icon-03.svg" alt="Award">
-                                </div>
-                                <div class="award-list-outs">
-                                    <h4>Internation conference in "St.John School"</h4>
-                                    <h5>Justin Leeattended internation conference in "St.John School"</h5>
-                                </div>
-                                <div class="award-time-list">
-                                    <span>2 Week ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-awards mb-0">
-                                <div class="award-boxs">
-                                    <img src="assets/img/icons/award-icon-04.svg" alt="Award">
-                                </div>
-                                <div class="award-list-outs">
-                                    <h4>Won 1st place in "Chess"</h4>
-                                    <h5>John Doe won 1st place in "Chess"</h5>
-                                </div>
-                                <div class="award-time-list">
-                                    <span>3 Day ago</span>
-                                </div>
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle fs-1 mb-3"></i>
+                                <h6>No student activities available</h6>
+                                <p class="small">Student activities will appear here when available</p>
                             </div>
                         </div>
                     </div>
@@ -307,48 +213,51 @@
             <div class="col-xl-3 col-sm-6 col-12">
                 <div class="card flex-fill fb sm-box">
                     <div class="social-likes">
-                        <p>Like us on facebook</p>
-                        <h6>50,095</h6>
+                        <p>Total Enrollments</p>
+                        <h6>{{ number_format($totalEnrollments) }}</h6>
                     </div>
                     <div class="social-boxs">
-                        <img src="assets/img/icons/social-icon-01.svg" alt="Social Icon">
+                        <i class="fas fa-user-graduate text-primary fs-2"></i>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 col-12">
                 <div class="card flex-fill twitter sm-box">
                     <div class="social-likes">
-                        <p>Follow us on twitter</p>
-                        <h6>48,596</h6>
+                        <p>Total Grades</p>
+                        <h6>{{ number_format($totalGrades) }}</h6>
                     </div>
                     <div class="social-boxs">
-                        <img src="assets/img/icons/social-icon-02.svg" alt="Social Icon">
+                        <i class="fas fa-clipboard-list text-info fs-2"></i>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 col-12">
                 <div class="card flex-fill insta sm-box">
                     <div class="social-likes">
-                        <p>Follow us on instagram</p>
-                        <h6>52,085</h6>
+                        <p>Total Sections</p>
+                        <h6>{{ number_format($totalSections) }}</h6>
                     </div>
                     <div class="social-boxs">
-                        <img src="assets/img/icons/social-icon-03.svg" alt="Social Icon">
+                        <i class="fas fa-layer-group text-warning fs-2"></i>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 col-12">
                 <div class="card flex-fill linkedin sm-box">
                     <div class="social-likes">
-                        <p>Follow us on linkedin</p>
-                        <h6>69,050</h6>
+                        <p>Total Announcements</p>
+                        <h6>{{ number_format($totalAnnouncements) }}</h6>
                     </div>
                     <div class="social-boxs">
-                        <img src="assets/img/icons/social-icon-04.svg" alt="Social Icon">
+                        <i class="fas fa-bullhorn text-success fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
 @endsection 

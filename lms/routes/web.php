@@ -48,10 +48,6 @@ Route::group(['middleware'=>'auth'],function()
     {
         return view('home');
     });
-    Route::get('home',function()
-    {
-        return view('home');
-    });
 });
 
 Auth::routes();
@@ -81,6 +77,7 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
         Route::get('admin/dashboard', 'adminDashboardIndex')->middleware(['auth', 'role:Admin'])->name('admin/dashboard');
         Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware(['auth', 'role:Teacher'])->name('teacher/dashboard');
+        Route::get('teacher/classes', 'teacherClasses')->middleware(['auth', 'role:Teacher'])->name('teacher.classes');
         Route::get('student/dashboard', 'studentDashboardIndex')->middleware(['auth', 'role:Student'])->name('student/dashboard');
         Route::get('parent/dashboard', 'parentDashboardIndex')->middleware(['auth', 'role:Parent'])->name('parent/dashboard');
     });
@@ -521,6 +518,7 @@ Route::group(['prefix' => 'notifications', 'middleware' => ['auth']], function (
 
 // Parent Routes
 Route::group(['prefix' => 'parent', 'middleware' => ['auth', 'role:Parent']], function () {
+    Route::get('/child/{childId}/profile', [App\Http\Controllers\ParentController::class, 'childProfile'])->name('parent.child.profile');
     Route::get('/child/{childId}/grades', [App\Http\Controllers\ParentController::class, 'childGrades'])->name('parent.child.grades');
     Route::get('/child/{childId}/attendance', [App\Http\Controllers\ParentController::class, 'childAttendance'])->name('parent.child.attendance');
     Route::get('/child/{childId}/activities', [App\Http\Controllers\ParentController::class, 'childActivities'])->name('parent.child.activities');
