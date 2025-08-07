@@ -294,6 +294,14 @@ Route::group(['middleware' => ['role:Teacher']], function () {
     });
 });
 
+// Notification routes
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::get('/notifications/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+});
+
 // Student-only routes
 Route::group(['middleware' => ['role:Student']], function () {
     // My Classes route

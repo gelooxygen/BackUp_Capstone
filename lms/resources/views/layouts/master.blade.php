@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-    <title>Enhancing Academic Management: A Unified Web Portal with Intelligent Features for Panorama Montessori School Inc.</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>PMS Portal</title>
     <link rel="shortcut icon" href="{{ URL::to('assets/img/favicon.png') }}">
     <link rel="stylesheet" href="{{ URL::to('assets/plugins/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ URL::to('assets/plugins/feather/feather.css') }}">
@@ -28,10 +29,10 @@
         <div class="header">
             <div class="header-left">
                 <a href="{{ route('home') }}" class="logo">
-                    <img src="/images/Logo.jpg" alt="Logo">
+                    <img src="{{ URL::to('assets/img/Logo.jpg') }}" alt="Logo">
                 </a>
                 <a href="{{ route('home') }}" class="logo logo-small">
-                    <img src="/images/Logo.jpg" alt="Logo" width="30" height="30">
+                    <img src="{{ URL::to('assets/img/Logo.jpg') }}" alt="Logo" width="30" height="30">
                 </a>
             </div>
             <div class="menu-toggle">
@@ -50,128 +51,96 @@
                 <i class="fas fa-bars"></i>
             </a>
             <ul class="nav user-menu">
-                <li class="nav-item dropdown noti-dropdown language-drop me-2">
-                    <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
-                        <img src="{{ URL::to('assets/img/icons/header-icon-01.svg') }}" alt="">
-                    </a>
-                    <div class="dropdown-menu ">
-                        <div class="noti-content">
-                            <div>
-                                <a class="dropdown-item" href="javascript:;"><i class="flag flag-lr me-2"></i>English</a>
-                                <a class="dropdown-item" href="javascript:;"><i class="flag flag-kh me-2"></i>Khmer</a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
+
 
                 <li class="nav-item dropdown noti-dropdown me-2">
                     <a href="#" class="dropdown-toggle nav-link header-nav-list" data-bs-toggle="dropdown">
-                        <img src="{{ URL::to('assets/img/icons/header-icon-05.svg') }}" alt="">
+                        <i class="fas fa-bell"></i>
+                        @php
+                            $unreadCount = auth()->user()->unreadNotifications()->count();
+                        @endphp
+                        @if($unreadCount > 0)
+                            <span class="badge badge-danger">{{ $unreadCount }}</span>
+                        @endif
                     </a>
                     <div class="dropdown-menu notifications">
                         <div class="topnav-dropdown-header">
                             <span class="notification-title">Notifications</span>
-                            <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+                            @if($unreadCount > 0)
+                                <a href="javascript:void(0)" class="clear-noti" onclick="markAllAsRead()"> Clear All </a>
+                            @endif
                         </div>
                         <div class="noti-content">
                             <ul class="notification-list">
-                                <li class="notification-message">
-                                    <a href="#">
+                                @forelse(auth()->user()->notifications()->take(5)->get() as $notification)
+                                    <li class="notification-message {{ $notification->read_at ? '' : 'unread' }}">
+                                        <a href="javascript:void(0)" onclick="markAsRead('{{ $notification->id }}')">
+                                            <div class="media d-flex">
+                                                <span class="avatar avatar-sm flex-shrink-0">
+                                                    <i class="fas fa-info-circle text-primary"></i>
+                                                </span>
+                                                <div class="media-body flex-grow-1">
+                                                    <p class="noti-details">
+                                                        <span class="noti-title">{{ $notification->data['title'] ?? 'Notification' }}</span>
+                                                        <br>
+                                                        <small>{{ $notification->data['message'] ?? 'You have a new notification' }}</small>
+                                                    </p>
+                                                    <p class="noti-time">
+                                                        <span class="notification-time">{{ $notification->created_at->diffForHumans() }}</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                @empty
+                                    <li class="notification-message">
                                         <div class="media d-flex">
-                                            <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Carlson Tech</span> has
-                                                    approved <span class="noti-title">your estimate</span></p>
-                                                <p class="noti-time"><span class="notification-time">4 mins ago</span>
-                                                </p>
+                                            <div class="media-body flex-grow-1 text-center">
+                                                <p class="noti-details text-muted">No notifications</p>
                                             </div>
                                         </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="#">
-                                        <div class="media d-flex">
-                                            <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details">
-                                                    <span class="noti-title">International Software Inc</span> has sent you a invoice in the amount of
-                                                    <span class="noti-title">$218</span>
-                                                </p>
-                                                <p class="noti-time">
-                                                    <span class="notification-time">6 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="#">
-                                        <div class="media d-flex">
-                                            <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="User Image" src="{{ URL::to('assets/img/logo-small.png') }}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">John Hendry</span> sent a cancellation request <span class="noti-title">Apple iPhone XR</span></p>
-                                                <p class="noti-time"><span class="notification-time">8 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                                <li class="notification-message">
-                                    <a href="#">
-                                        <div class="media d-flex">
-                                            <span class="avatar avatar-sm flex-shrink-0">
-                                                <img class="avatar-img rounded-circle" alt="" src="{{ URL::to('assets/img/logo-small.png') }}">
-                                            </span>
-                                            <div class="media-body flex-grow-1">
-                                                <p class="noti-details"><span class="noti-title">Mercury Software Inc</span> added a new product <span class="noti-title">Apple MacBook Pro</span></p>
-                                                <p class="noti-time"><span class="notification-time">12 mins ago</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
+                                    </li>
+                                @endforelse
                             </ul>
                         </div>
                         <div class="topnav-dropdown-footer">
-                            <a href="#">View all Notifications</a>
+                            <a href="{{ route('notifications.index') }}">View all Notifications</a>
                         </div>
                     </div>
                 </li>
 
                 <li class="nav-item zoom-screen me-2">
                     <a href="#" class="nav-link header-nav-list win-maximize">
-                        <img src="{{ URL::to('assets/img/icons/header-icon-04.svg') }}" alt="">
+                        <i class="fas fa-expand-arrows-alt"></i>
                     </a>
                 </li>
 
                 <li class="nav-item dropdown has-arrow new-user-menus">
                     <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
                         <span class="user-img">
-                            <img class="rounded-circle" src="/images/{{ Session::get('avatar') }}" width="31"alt="">
+                            <div class="user-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
                             <div class="user-text">
-                                <h6>{{ Session::get('name') }}</h6>
-                                <p class="text-muted mb-0">{{ Session::get('role_name') }}</p>
+                                <h6>{{ auth()->user()->name }}</h6>
+                                <p class="text-muted mb-0">{{ auth()->user()->role_name }}</p>
                             </div>
                         </span>
                     </a>
                     <div class="dropdown-menu">
                         <div class="user-header">
                             <div class="avatar avatar-sm">
-                                <img src="/images/{{ Session::get('avatar') }}" alt="" class="avatar-img rounded-circle">
+                                <div class="user-avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
                             </div>
                             <div class="user-text">
-                                <h6>{{ Session::get('name') }}</h6>
-                                <p class="text-muted mb-0">{{ Session::get('role_name') }}</p>
+                                <h6>{{ auth()->user()->name }}</h6>
+                                <p class="text-muted mb-0">{{ auth()->user()->role_name }}</p>
                             </div>
                         </div>
                         <a class="dropdown-item" href="{{ route('user/profile/page') }}">My Profile</a>
-                        <a class="dropdown-item" href="inbox.html">Inbox</a>
+                        <a class="dropdown-item" href="{{ route('notifications.index') }}">Notifications</a>
                         <a class="dropdown-item" href="{{ route('logout') }}">Logout</a>
                     </div>
                 </li>
@@ -203,12 +172,142 @@
     <script src="{{ URL::to('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ URL::to('assets/js/script.js') }}"></script>
     @yield('script')
+    
+    <style>
+    /* Notification badge styling */
+    .noti-dropdown .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        background-color: #dc3545;
+        color: white;
+        border: 2px solid white;
+    }
+    
+    .noti-dropdown {
+        position: relative;
+    }
+    
+    .notification-message.unread {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+    }
+    
+    .notification-message.unread .noti-title {
+        font-weight: 600;
+    }
+    
+    /* User avatar placeholder styling */
+    .user-avatar-placeholder {
+        width: 31px;
+        height: 31px;
+        background-color: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .user-avatar-placeholder:hover {
+        background-color: #e9ecef;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+    
+    .avatar.avatar-sm .user-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    /* Remove old avatar styling */
+    .user-img img {
+        display: none;
+    }
+    
+    .avatar-img {
+        display: none;
+    }
+    </style>
     <script>
         $(document).ready(function() {
             $('.select2s-hidden-accessible').select2({
                 closeOnSelect: false
             });
         });
+
+        // Notification functions
+        function markAsRead(notificationId) {
+            $.ajax({
+                url: '/notifications/' + notificationId + '/mark-as-read',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Update the notification count
+                    updateNotificationCount();
+                    // Reload the page to refresh notifications
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            });
+        }
+
+        function markAllAsRead() {
+            $.ajax({
+                url: '/notifications/mark-all-as-read',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Update the notification count
+                    updateNotificationCount();
+                    // Reload the page to refresh notifications
+                    location.reload();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error marking all notifications as read:', error);
+                }
+            });
+        }
+
+        function updateNotificationCount() {
+            $.ajax({
+                url: '/notifications/unread-count',
+                type: 'GET',
+                success: function(response) {
+                    const badge = $('.noti-dropdown .badge');
+                    if (response.count > 0) {
+                        if (badge.length) {
+                            badge.text(response.count);
+                        } else {
+                            $('.noti-dropdown a').append('<span class="badge badge-danger">' + response.count + '</span>');
+                        }
+                    } else {
+                        badge.remove();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating notification count:', error);
+                }
+            });
+        }
+
+        // Auto-refresh notifications every 30 seconds
+        setInterval(function() {
+            updateNotificationCount();
+        }, 30000);
     </script>
 </body>
 </html>

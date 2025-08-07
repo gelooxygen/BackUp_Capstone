@@ -227,7 +227,54 @@ class StudentController extends Controller
             ->where('status', 'active')
             ->get();
         
-        return view('student.my-classes', compact('student', 'enrollments'));
+        // Calculate comprehensive statistics
+        $totalGrades = $student->grades()->count();
+        $averageGrade = $student->grades()->avg('percentage') ?? 0;
+        $totalAttendance = $student->attendanceRecords()->count();
+        $presentAttendance = $student->attendanceRecords()->where('status', 'present')->count();
+        $attendanceRate = $totalAttendance > 0 ? round(($presentAttendance / $totalAttendance) * 100, 1) : 0;
+        
+        // Get upcoming deadlines (placeholder data - can be enhanced with real assignment data)
+        $upcomingDeadlines = collect([
+            [
+                'title' => 'Math Assignment #3',
+                'type' => 'assignment',
+                'due_date' => now()->addDays(2),
+                'subject' => 'Mathematics',
+                'icon' => 'fas fa-file-alt'
+            ],
+            [
+                'title' => 'Science Quiz',
+                'type' => 'quiz',
+                'due_date' => now()->addDays(5),
+                'subject' => 'Science',
+                'icon' => 'fas fa-question-circle'
+            ],
+            [
+                'title' => 'Online Class',
+                'type' => 'class',
+                'due_date' => now(),
+                'subject' => 'English',
+                'icon' => 'fas fa-video'
+            ]
+        ]);
+        
+        // Calculate performance overview
+        $performanceStats = [
+            'average_grade' => round($averageGrade, 1),
+            'attendance_rate' => $attendanceRate,
+            'total_assignments' => 15, // Placeholder - can be enhanced with real data
+            'total_quizzes' => 8, // Placeholder - can be enhanced with real data
+            'total_grades' => $totalGrades,
+            'total_attendance' => $totalAttendance
+        ];
+        
+        return view('student.my-classes', compact(
+            'student', 
+            'enrollments', 
+            'upcomingDeadlines', 
+            'performanceStats'
+        ));
     }
 
     /** student class detail page */
