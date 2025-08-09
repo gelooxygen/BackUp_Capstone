@@ -48,7 +48,7 @@ class ClassScheduleController extends Controller
             
             if ($children->isEmpty()) {
                 Log::warning('No children linked to parent', ['parent_email' => $user->email]);
-                return redirect()->route('parent/dashboard')->with('error', 'No children are linked to your account. Please contact the school administration to link your children.');
+                return redirect()->route('dashboard')->with('error', 'No children are linked to your account. Please contact the school administration to link your children.');
             }
             
             if (!$studentId) {
@@ -62,7 +62,7 @@ class ClassScheduleController extends Controller
                         'parent_email' => $user->email,
                         'requested_student_id' => $studentId
                     ]);
-                    return redirect()->route('parent/dashboard')->with('error', 'Access denied. This student is not linked to your account.');
+                    return redirect()->route('dashboard')->with('error', 'Access denied. This student is not linked to your account.');
                 }
             }
         }
@@ -71,7 +71,7 @@ class ClassScheduleController extends Controller
             Log::error('No student ID found', ['user_role' => $user->role_name]);
             
             if ($user->role_name === 'Parent') {
-                return redirect()->route('parent/dashboard')->with('error', 'Unable to find your child\'s information. Please contact the school administration.');
+                return redirect()->route('dashboard')->with('error', 'Unable to find your child\'s information. Please contact the school administration.');
             }
             
             return redirect()->back()->with('error', 'Student not found');
@@ -85,7 +85,7 @@ class ClassScheduleController extends Controller
             Log::error('Student not found in database', ['student_id' => $studentId]);
             
             if ($user->role_name === 'Parent') {
-                return redirect()->route('parent/dashboard')->with('error', 'Your child\'s information could not be found. Please contact the school administration.');
+                return redirect()->route('dashboard')->with('error', 'Your child\'s information could not be found. Please contact the school administration.');
             }
             
             return redirect()->back()->with('error', 'Student not found');
@@ -105,7 +105,7 @@ class ClassScheduleController extends Controller
             ]);
             
             if ($user->role_name === 'Parent') {
-                return redirect()->route('parent/dashboard')->with('error', 'Your child is not assigned to any section. Please contact the school administration.');
+                return redirect()->route('dashboard')->with('error', 'Your child is not assigned to any section. Please contact the school administration.');
             }
             
             return redirect()->back()->with('error', 'Student is not assigned to any section');

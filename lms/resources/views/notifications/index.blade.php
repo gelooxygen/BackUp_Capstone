@@ -30,24 +30,24 @@
                                             <div class="notification-content">
                                                 <div class="notification-icon">
                                                     <i class="fas fa-info-circle text-primary"></i>
-                                                </div>
+                                    </div>
                                                 <div class="notification-details">
                                                     <h6>{{ $notification->data['title'] ?? 'Notification' }}</h6>
                                                     <p>{{ $notification->data['message'] ?? 'You have a new notification' }}</p>
                                                     <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                                </div>
+                                    </div>
                                                 @if(!$notification->read_at)
                                                     <div class="notification-actions">
                                                         <button class="btn btn-sm btn-primary" onclick="markAsRead('{{ $notification->id }}')">
                                                             Mark as Read
                                                         </button>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
                                 </div>
-                                
+                                                            @endif
+                                                        </div>
+                                                        </div>
+                                            @endforeach
+                                </div>
+
                                 <div class="d-flex justify-content-center mt-4">
                                     {{ $notifications->links() }}
                                 </div>

@@ -9,7 +9,7 @@
                 {{-- ADMIN SIDEBAR --}}
                 @if (Session::get('role_name') === 'Admin')
                     <li class="submenu">
-                        <a href="{{ route('admin/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                        <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-shield-alt"></i> <span>User Management</span> <span class="menu-arrow"></span></a>
@@ -56,7 +56,7 @@
                 {{-- TEACHER SIDEBAR --}}
                 @if (Session::get('role_name') === 'Teacher')
                     <li class="submenu">
-                        <a href="{{ route('teacher/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                        <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-graduation-cap"></i> <span>Grading Management</span> <span class="menu-arrow"></span></a>
@@ -102,7 +102,7 @@
                 {{-- STUDENT SIDEBAR --}}
                 @if (Session::get('role_name') === 'Student')
                     <li class="submenu">
-                        <a href="{{ route('student/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                        <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-graduation-cap"></i> <span>My Classes</span> <span class="menu-arrow"></span></a>
@@ -147,7 +147,7 @@
                         $selectedChild = $children->first();
                     @endphp
                     <li class="submenu">
-                        <a href="{{ route('parent/dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
+                        <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a>
                     </li>
                     @if($selectedChild)
                         <li><a href="{{ route('parent.child.profile', $selectedChild->id) }}"><i class="fas fa-user"></i> <span>Child Profile</span></a></li>

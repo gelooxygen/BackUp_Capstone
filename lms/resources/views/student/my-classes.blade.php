@@ -173,10 +173,10 @@
                         <h3>No Classes Enrolled</h3>
                         <p>You haven't been enrolled in any classes yet. Contact your academic advisor to get started.</p>
                         <div class="empty-actions">
-                            <a href="{{ route('student/dashboard') }}" class="btn btn-primary btn-modern">
-                                <i class="fas fa-arrow-left"></i>
-                                Back to Dashboard
-                            </a>
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary btn-modern">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Dashboard
+                        </a>
                             <a href="#" class="btn btn-secondary btn-modern">
                                 <i class="fas fa-question-circle"></i>
                                 Contact Advisor

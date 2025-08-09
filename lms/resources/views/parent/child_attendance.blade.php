@@ -9,12 +9,12 @@
                     <div class="col">
                         <h3 class="page-title">{{ $child->full_name }} - Attendance</h3>
                         <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('parent/dashboard') }}">Parent Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item active">{{ $child->full_name }} - Attendance</li>
                         </ul>
                     </div>
                     <div class="col-auto text-end float-end ms-auto">
-                        <a href="{{ route('parent/dashboard') }}" class="btn btn-primary">
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary">
                             <i class="fas fa-arrow-left"></i> Back to Dashboard
                         </a>
                     </div>

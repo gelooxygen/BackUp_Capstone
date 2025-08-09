@@ -75,11 +75,7 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::get('/home', 'index')->middleware('auth')->name('home');
         Route::get('/dashboard', 'dashboard')->middleware('auth')->name('dashboard');
         Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
-        Route::get('admin/dashboard', 'adminDashboardIndex')->middleware(['auth', 'role:Admin'])->name('admin/dashboard');
-        Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware(['auth', 'role:Teacher'])->name('teacher/dashboard');
         Route::get('teacher/classes', 'teacherClasses')->middleware(['auth', 'role:Teacher'])->name('teacher.classes');
-        Route::get('student/dashboard', 'studentDashboardIndex')->middleware(['auth', 'role:Student'])->name('student/dashboard');
-        Route::get('parent/dashboard', 'parentDashboardIndex')->middleware(['auth', 'role:Parent'])->name('parent/dashboard');
     });
 
     // ----------------------------- user controller ---------------------//

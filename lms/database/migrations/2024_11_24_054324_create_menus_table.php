@@ -34,46 +34,12 @@ return new class extends Migration
         $dashboardMenuId = DB::table('menus')->insertGetId([
             'title' => 'Dashboard',
             'icon'  => 'fas fa-tachometer-alt',
-            'route' => null,
-            'active_routes' => json_encode(['home', 'teacher/dashboard', 'student/dashboard']),
+            'route' => 'dashboard',
+            'active_routes' => json_encode(['dashboard']),
             'pattern'   => null,
             'parent_id' => null,
             'order'     => 1,
             'is_active' => true,
-        ]);
-
-        // Insert submenu items under "Dashboard"
-        DB::table('menus')->insert([
-            [
-                'title' => 'Admin Dashboard',
-                'icon'  => null,
-                'route' => 'home',
-                'active_routes' => json_encode(['home']),
-                'pattern'   => null,
-                'parent_id' => $dashboardMenuId,
-                'order'     => 1,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Teacher Dashboard',
-                'icon'  => null,
-                'route' => 'teacher/dashboard',
-                'active_routes' => json_encode(['teacher/dashboard']),
-                'pattern'   => null,
-                'parent_id' => $dashboardMenuId,
-                'order'     => 2,
-                'is_active' => true,
-            ],
-            [
-                'title' => 'Student Dashboard',
-                'icon'  => null,
-                'route' => 'student/dashboard',
-                'active_routes' => json_encode(['student/dashboard']),
-                'pattern'   => null,
-                'parent_id' => $dashboardMenuId,
-                'order'     => 3,
-                'is_active' => true,
-            ],
         ]);
 
         // Insert the "User Management" menu
