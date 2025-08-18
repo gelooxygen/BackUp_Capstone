@@ -152,7 +152,7 @@
 		{{-- content page --}}
         @yield('content')
         <footer>
-            <p>Copyright ©  <?php echo date('Y'); ?> Soeng Souy.</p>
+            <p>Copyright ©  <?php echo date('Y'); ?> Panorama Montessori School.</p>
         </footer>
     
     </div>

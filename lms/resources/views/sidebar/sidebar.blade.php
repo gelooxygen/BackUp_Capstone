@@ -18,17 +18,23 @@
                         </ul>
                     </li>
                     <li class="submenu">
+                        <a href="#"><i class="fas fa-user-plus"></i> <span>Create user</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('enrollments.create') }}"><i class="fas fa-user-plus"></i> <span>Create User</span></a></li>
+                            <li><a href="{{ route('enrollments.index') }}"><i class="fas fa-list"></i> <span>View Enrollments</span></a></li>
+                            <li><a href="{{ route('student/list') }}"><i class="fas fa-user-graduate"></i> <span>View Students</span></a></li>
+                            <li><a href="{{ route('teacher/list/page') }}"><i class="fas fa-chalkboard-teacher"></i> <span>View Teachers</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
                         <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span>Class & Subject </span> <span class="menu-arrow"></span></a>
                         <ul>
                             <li><a href="{{ route('sections.index') }}">Sections</a></li>
                             <li><a href="{{ route('subject/list/page') }}">Subjects</a></li>
                         </ul>
                     </li>
-                    <li class="submenu">
-                        <a href="#"><i class="fas fa-calendar-alt"></i> <span>Academic Module</span> <span class="menu-arrow"></span></a>
-                        <ul>
-                            <li><a href="{{ route('academic_years.index') }}">Academic Years</a></li>
-                        </ul>
+                    <li>
+                        <a href="{{ route('academic_years.index') }}"><i class="fas fa-calendar-alt"></i> <span>Academic Years</span></a>
                     </li>
                     <li class="submenu">
                         <a href="#"><i class="fas fa-calendar"></i> <span>Calendar Management</span> <span class="menu-arrow"></span></a>
@@ -42,12 +48,19 @@
                         <ul>    
                             <li><a href="{{ route('announcements.index') }}"><i class="fas fa-bullhorn"></i> <span>Announcements</span></a></li>
                             <li><a href="{{ route('messages.index') }}"><i class="fas fa-envelope"></i> <span>Messages</span></a></li>
-                            <li><a href="{{ route('notifications.index') }}"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
                         </ul>
                     </li>
                     {{-- Curriculum Management only for Admins --}}
                     <li>
                         <a href="{{ route('curriculum.index') }}"><i class="fas fa-book"></i> <span>Curriculum Management</span></a>
+                    </li>
+                    <!-- <li class="submenu">
+                        <a href="#"><i class="fas fa-graduation-cap"></i> <span>LMS Monitoring</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('assignments.index') }}"><i class="fas fa-tasks"></i> <span>All Assignments</span></a></li>
+                            <li><a href="{{ route('class-posts.index') }}"><i class="fas fa-bullhorn"></i> <span>All Class Posts</span></a></li>
+                            <li><a href="{{ route('student.assignments.index') }}"><i class="fas fa-users"></i> <span>Student Submissions</span></a></li>
+                        </ul> -->
                     </li>
                     <li><a href="{{ route('analytics.admin-dashboard') }}"><i class="fas fa-chart-bar"></i> <span>School Analytics</span></a></li>
                     <li><a href="{{ route('setting/page') }}"><i class="fas fa-cog"></i> <span>System Settings</span></a></li>
@@ -64,7 +77,7 @@
                             <li><a href="{{ route('teacher.grading.grade-entry') }}"><i class="fas fa-edit"></i> <span>Grade Entry</span></a></li>
                             <li><a href="{{ route('teacher.grading.gpa-ranking') }}"><i class="fas fa-chart-bar"></i> <span>GPA Ranking</span></a></li>
                             <li><a href="{{ route('teacher.grading.performance-analytics') }}"><i class="fas fa-chart-line"></i> <span>Performance Analytics</span></a></li>
-                            <li><a href="{{ route('teacher.grading.weight-settings') }}"><i class="fas fa-cog"></i> <span>Weight Settings</span></a></li>
+
                             <li><a href="{{ route('teacher.grading.grade-alerts') }}"><i class="fas fa-exclamation-triangle"></i> <span>Grade Alerts</span></a></li>
                         </ul>
                     </li>
@@ -75,6 +88,22 @@
                             <li><a href="{{ route('lessons.create') }}"><i class="fas fa-plus"></i> <span>Create Lesson</span></a></li>
                             <li><a href="{{ route('lessons.recommendations.student-analysis') }}"><i class="fas fa-chart-line"></i> <span>Performance Analysis</span></a></li>
                             <li><a href="{{ route('lessons.recommendations.class-analysis') }}"><i class="fas fa-users"></i> <span>Class Analysis</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-tasks"></i> <span>Assignment Management</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('assignments.index') }}"><i class="fas fa-list"></i> <span>All Assignments</span></a></li>
+                            <li><a href="{{ route('assignments.create') }}"><i class="fas fa-plus"></i> <span>Create Assignment</span></a></li>
+                            <li><a href="{{ route('assignments.index') }}"><i class="fas fa-check-circle"></i> <span>Grade Submissions</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-bullhorn"></i> <span>Class Posts</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('class-posts.index') }}"><i class="fas fa-list"></i> <span>All Posts</span></a></li>
+                            <li><a href="{{ route('class-posts.create') }}"><i class="fas fa-plus"></i> <span>Create Post</span></a></li>
+                            <li><a href="#"><i class="fas fa-comments"></i> <span>Manage Comments</span></a></li>
                         </ul>
                     </li>
                     <li>
@@ -98,6 +127,8 @@
                     </li>
                    
                 @endif
+
+
 
                 {{-- STUDENT SIDEBAR --}}
                 @if (Session::get('role_name') === 'Student')
@@ -126,6 +157,14 @@
                         </ul>
                     </li>
                     <li><a href="{{ route('student.my-schedule') }}"><i class="fas fa-calendar-alt"></i> <span>My Schedule</span></a></li>
+                    <li class="submenu">
+                        <a href="#"><i class="fas fa-tasks"></i> <span>Assignments</span> <span class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('student.assignments.index') }}"><i class="fas fa-list"></i> <span>My Assignments</span></a></li>
+                            <li><a href="#"><i class="fas fa-upload"></i> <span>Submit Work</span></a></li>
+                            <li><a href="#"><i class="fas fa-check-circle"></i> <span>View Grades</span></a></li>
+                        </ul>
+                    </li>
                     <li><a href="{{ route('student.grades') }}"><i class="fas fa-clipboard-list"></i> <span>Grades</span></a></li>
                     <li><a href="{{ route('student.attendance') }}"><i class="fas fa-user-check"></i> <span>Attendance Records</span></a></li>
                     <li class="submenu">

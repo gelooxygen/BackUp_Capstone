@@ -18,7 +18,7 @@
         </div>
 
         <div class="student-group-form">
-            <form method="GET" action="{{ route('teacher/list') }}">
+            <form method="GET" action="{{ route('teacher/list/page') }}">
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="form-group">
@@ -38,7 +38,7 @@
                     <div class="col-lg-2">
                         <div class="search-student-btn">
                             <button type="submit" class="btn btn-primary">Search</button>
-                            <a href="{{ route('teacher/list') }}" class="btn btn-secondary">Clear</a>
+                            <a href="{{ route('teacher/list/page') }}" class="btn btn-secondary">Clear</a>
                         </div>
                     </div>
                 </div>

@@ -56,8 +56,7 @@
         
         <div class="text-center">
             <p style="color: rgba(255, 255, 255, 0.9); margin-bottom: 0;">
-                Don't have an account? 
-                <a href="{{ route('register') }}" style="color: white; text-decoration: none; font-weight: 600;">Sign up here</a>
+                Need access? Contact your administrator.
             </p>
         </div>
     </form>

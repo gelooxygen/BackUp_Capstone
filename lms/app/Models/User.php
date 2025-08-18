@@ -10,11 +10,10 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\HasDatabaseNotifications;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, LogsActivity, HasRoles, HasDatabaseNotifications;
+    use HasApiTokens, HasFactory, Notifiable, LogsActivity, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -28,8 +27,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'join_date',
         'phone_number',
         'status',
-        'role_name',
-        'email',
         'role_name',
         'avatar',
         'position',

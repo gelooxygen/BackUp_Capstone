@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -409,7 +410,7 @@ class HomeController extends Controller
             );
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Parent Dashboard Error: ' . $e->getMessage(), [
+            Log::error('Parent Dashboard Error: ' . $e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
@@ -431,6 +432,9 @@ class HomeController extends Controller
             ];
         }
     }
+
+
+
 
     /**
      * Get child grades for parent dashboard
@@ -634,7 +638,7 @@ class HomeController extends Controller
             'current_password' => 'required',
             'new_password' => 'required|string|min:8|confirmed',
         ]);
-        if (!\Hash::check($request->current_password, $user->password)) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors(['current_password' => 'Current password is incorrect.']);
         }
         $user->password = bcrypt($request->new_password);

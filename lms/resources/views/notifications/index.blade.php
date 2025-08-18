@@ -23,29 +23,29 @@
                             <h4 class="card-title">All Notifications</h4>
                         </div>
                         <div class="card-body">
-                            @if($notifications->count() > 0)
+                            @if(isset($notifications) && $notifications->count() > 0)
                                 <div class="notification-list">
                                     @foreach($notifications as $notification)
                                         <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}">
                                             <div class="notification-content">
                                                 <div class="notification-icon">
                                                     <i class="fas fa-info-circle text-primary"></i>
-                                    </div>
+                                                </div>
                                                 <div class="notification-details">
                                                     <h6>{{ $notification->data['title'] ?? 'Notification' }}</h6>
                                                     <p>{{ $notification->data['message'] ?? 'You have a new notification' }}</p>
                                                     <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                    </div>
+                                                </div>
                                                 @if(!$notification->read_at)
                                                     <div class="notification-actions">
                                                         <button class="btn btn-sm btn-primary" onclick="markAsRead('{{ $notification->id }}')">
                                                             Mark as Read
                                                         </button>
-                                </div>
-                                                            @endif
-                                                        </div>
-                                                        </div>
-                                            @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
 
                                 <div class="d-flex justify-content-center mt-4">

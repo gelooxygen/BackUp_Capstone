@@ -194,7 +194,7 @@
     @endif
 
     <div class="footer">
-        <p>This report was generated automatically by the LMS System</p>
+        <p>This report was generated automatically by Panorama Montessori School LMS System</p>
         <p>Page 1 of 1</p>
     </div>
 </body>

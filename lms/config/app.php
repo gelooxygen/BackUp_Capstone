@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'name' => 'Enhancing Academic Management: A Unified Web Portal with Intelligent Features for Panorama Montessori School Inc.',
+    'name' => 'PMS Portal',
 
     /*
     |--------------------------------------------------------------------------

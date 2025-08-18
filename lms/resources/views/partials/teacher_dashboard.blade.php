@@ -15,6 +15,47 @@
     </div>
 </div>
 
+{{-- Quick Actions Section --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('assignments.create') }}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-tasks fa-2x mb-2"></i>
+                            <span class="fw-bold">Create Assignment</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('class-posts.create') }}" class="btn btn-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                            <span class="fw-bold">Create Class Post</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('assignments.index') }}" class="btn btn-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-list fa-2x mb-2"></i>
+                            <span class="fw-bold">View Assignments</span>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('class-posts.index') }}" class="btn btn-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-comments fa-2x mb-2"></i>
+                            <span class="fw-bold">View Class Posts</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-xl-3 col-sm-6 col-12 d-flex">
         <div class="card bg-comman w-100">

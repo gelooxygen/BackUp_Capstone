@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\Setting;
@@ -50,7 +50,7 @@ Route::group(['middleware'=>'auth'],function()
     });
 });
 
-Auth::routes();
+
 Route::group(['namespace' => 'App\Http\Controllers\Auth'],function()
 {
     // ----------------------------login ------------------------------//
@@ -61,11 +61,17 @@ Route::group(['namespace' => 'App\Http\Controllers\Auth'],function()
         Route::post('change/password', 'changePassword')->name('change/password');
     });
 
-    // ----------------------------- register -------------------------//
-    Route::controller(RegisterController::class)->group(function () {
-        Route::get('/register', 'register')->name('register');
-        Route::post('/register','storeUser')->name('register');    
+    // ----------------------------password reset ------------------------------//
+    Route::controller(\App\Http\Controllers\Auth\PasswordResetLinkController::class)->group(function () {
+        Route::get('password/reset', 'create')->name('password.request');
+        Route::post('password/email', 'store')->name('password.email');
     });
+
+    Route::controller(\App\Http\Controllers\Auth\NewPasswordController::class)->group(function () {
+        Route::get('password/reset/{token}', 'create')->name('password.reset');
+        Route::post('password/reset', 'store')->name('password.update');
+    });
+
 });
 
 Route::group(['namespace' => 'App\Http\Controllers'],function()
@@ -80,12 +86,12 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 
     // ----------------------------- user controller ---------------------//
     Route::controller(UserManagementController::class)->group(function () {
-        Route::get('list/users', 'index')->middleware('auth')->name('list/users');
+        Route::get('list/users', 'index')->middleware(['auth', 'role:Admin'])->name('list/users');
         Route::post('change/password', 'changePassword')->name('change/password');
-        Route::get('view/user/edit/{id}', 'userView')->middleware('auth');
-        Route::post('user/update', 'userUpdate')->name('user/update');
-        Route::post('user/delete', 'userDelete')->name('user/delete');
-        Route::get('get-users-data', 'getUsersData')->name('get-users-data'); /** get all data users */
+        Route::get('view/user/edit/{id}', 'userView')->middleware(['auth', 'role:Admin']);
+        Route::post('user/update', 'userUpdate')->middleware(['auth', 'role:Admin'])->name('user/update');
+        Route::post('user/delete', 'userDelete')->middleware(['auth', 'role:Admin'])->name('user/delete');
+        Route::get('get-users-data', 'getUsersData')->middleware(['auth', 'role:Admin'])->name('get-users-data'); /** get all data users */
         Route::get('user/profile/edit', 'editProfile')->middleware('auth')->name('user/profile/edit');
         Route::post('user/profile/update', 'updateProfile')->middleware('auth')->name('user/profile/update');
         Route::post('user/password/update', 'updatePassword')->middleware('auth')->name('user/password/update');
@@ -99,13 +105,13 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 
     // ------------------------ student -------------------------------//
     Route::controller(StudentController::class)->group(function () {
-        Route::get('student/list', 'student')->middleware('auth')->name('student/list'); // list student
-        Route::get('student/grid', 'studentGrid')->middleware('auth')->name('student/grid'); // grid student
-        Route::get('student/add/page', 'studentAdd')->middleware('auth')->name('student/add/page'); // page student
-        Route::post('student/add/save', 'studentSave')->name('student/add/save'); // save record student
-        Route::get('student/edit/{id}', 'studentEdit'); // view for edit
-        Route::post('student/update', 'studentUpdate')->name('student/update'); // update record student
-        Route::post('student/delete', 'studentDelete')->name('student/delete'); // delete record student
+        Route::get('student/list', 'student')->middleware(['auth', 'role:Admin'])->name('student/list'); // list student
+        Route::get('student/grid', 'studentGrid')->middleware(['auth', 'role:Admin'])->name('student/grid'); // grid student
+        Route::get('student/add/page', 'studentAdd')->middleware(['auth', 'role:Admin'])->name('student/add/page'); // page student
+        Route::post('student/add/save', 'studentSave')->middleware(['auth', 'role:Admin'])->name('student/add/save'); // save record student
+        Route::get('student/edit/{id}', 'studentEdit')->middleware(['auth', 'role:Admin']); // view for edit
+        Route::post('student/update', 'studentUpdate')->middleware(['auth', 'role:Admin'])->name('student/update'); // update record student
+        Route::post('student/delete', 'studentDelete')->middleware(['auth', 'role:Admin'])->name('student/delete'); // delete record student
         Route::get('student/profile/{id}', 'studentProfile')->middleware('auth'); // profile student
     });
 
@@ -114,35 +120,35 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 
     // ------------------------ teacher -------------------------------//
     Route::controller(TeacherController::class)->group(function () {
-        Route::get('teacher/add/page', 'teacherAdd')->middleware('auth')->name('teacher/add/page'); // page teacher
-        Route::get('teacher/list/page', 'teacherList')->middleware('auth')->name('teacher/list/page'); // page teacher
-        Route::get('teacher/grid/page', 'teacherGrid')->middleware('auth')->name('teacher/grid/page'); // page grid teacher
-        Route::post('teacher/save', 'saveRecord')->middleware('auth')->name('teacher/save'); // save record
-        Route::get('teacher/edit/{user_id}', 'editRecord'); // view teacher record
-        Route::post('teacher/update', 'updateRecordTeacher')->middleware('auth')->name('teacher/update'); // update record
-        Route::post('teacher/delete', 'teacherDelete')->name('teacher/delete'); // delete record teacher
+        Route::get('teacher/add/page', 'teacherAdd')->middleware(['auth', 'role:Admin'])->name('teacher/add/page'); // page teacher
+        Route::get('teacher/list/page', 'teacherList')->middleware(['auth', 'role:Admin'])->name('teacher/list/page'); // page teacher
+        Route::get('teacher/grid/page', 'teacherGrid')->middleware(['auth', 'role:Admin'])->name('teacher/grid/page'); // page grid teacher
+        Route::post('teacher/save', 'saveRecord')->middleware(['auth', 'role:Admin'])->name('teacher/save'); // save record
+        Route::get('teacher/edit/{user_id}', 'editRecord')->middleware(['auth', 'role:Admin']); // view teacher record
+        Route::post('teacher/update', 'updateRecordTeacher')->middleware(['auth', 'role:Admin'])->name('teacher/update'); // update record
+        Route::post('teacher/delete', 'teacherDelete')->middleware(['auth', 'role:Admin'])->name('teacher/delete'); // delete record teacher
     });
 
     // ----------------------- department -----------------------------//
     Route::controller(DepartmentController::class)->group(function () {
-        Route::get('department/list/page', 'departmentList')->middleware('auth')->name('department/list/page'); // department/list/page
-        Route::get('department/add/page', 'indexDepartment')->middleware('auth')->name('department/add/page'); // page add department
-        Route::get('department/edit/{department_id}', 'editDepartment'); // page add department
-        Route::post('department/save', 'saveRecord')->middleware('auth')->name('department/save'); // department/save
-        Route::post('department/update', 'updateRecord')->middleware('auth')->name('department/update'); // department/update
-        Route::post('department/delete', 'deleteRecord')->middleware('auth')->name('department/delete'); // department/delete
-        Route::get('get-data-list', 'getDataList')->name('get-data-list'); // get data list
+        Route::get('department/list/page', 'departmentList')->middleware(['auth', 'role:Admin'])->name('department/list/page'); // department/list/page
+        Route::get('department/add/page', 'indexDepartment')->middleware(['auth', 'role:Admin'])->name('department/add/page'); // page add department
+        Route::get('department/edit/{department_id}', 'editDepartment')->middleware(['auth', 'role:Admin']); // page add department
+        Route::post('department/save', 'saveRecord')->middleware(['auth', 'role:Admin'])->name('department/save'); // department/save
+        Route::post('department/update', 'updateRecord')->middleware(['auth', 'role:Admin'])->name('department/update'); // department/update
+        Route::post('department/delete', 'deleteRecord')->middleware(['auth', 'role:Admin'])->name('department/delete'); // department/delete
+        Route::get('get-data-list', 'getDataList')->middleware(['auth', 'role:Admin'])->name('get-data-list'); // get data list
 
     });
 
     // ----------------------- subject -----------------------------//
     Route::controller(SubjectController::class)->group(function () {
-        Route::get('subject/list/page', 'subjectList')->middleware('auth')->name('subject/list/page'); // subject/list/page
-        Route::get('subject/add/page', 'subjectAdd')->middleware('auth')->name('subject/add/page'); // subject/add/page
-        Route::post('subject/save', 'saveRecord')->name('subject/save'); // subject/save
-        Route::post('subject/update', 'updateRecord')->name('subject/update'); // subject/update
-        Route::post('subject/delete', 'deleteRecord')->name('subject/delete'); // subject/delete
-        Route::get('subject/edit/{subject_id}', 'subjectEdit'); // subject/edit/page
+        Route::get('subject/list/page', 'subjectList')->middleware(['auth', 'role:Admin'])->name('subject/list/page'); // subject/list/page
+        Route::get('subject/add/page', 'subjectAdd')->middleware(['auth', 'role:Admin'])->name('subject/add/page'); // subject/add/page
+        Route::post('subject/save', 'saveRecord')->middleware(['auth', 'role:Admin'])->name('subject/save'); // subject/save
+        Route::post('subject/update', 'updateRecord')->middleware(['auth', 'role:Admin'])->name('subject/update'); // subject/update
+        Route::post('subject/delete', 'deleteRecord')->middleware(['auth', 'role:Admin'])->name('subject/delete'); // subject/delete
+        Route::get('subject/edit/{subject_id}', 'subjectEdit')->middleware(['auth', 'role:Admin']); // subject/edit/page
     });
 
     // ----------------------- invoice -----------------------------//
@@ -175,8 +181,12 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 
 // Add resource routes for academic years and enrollments
 Route::resource('academic_years', AcademicYearController::class)->middleware('auth');
-Route::resource('enrollments', EnrollmentController::class)->middleware('auth');
 Route::resource('sections', SectionController::class)->middleware('auth');
+
+// Enrollment routes (Admin only)
+Route::group(['middleware' => ['auth', 'role:Admin']], function () {
+    Route::resource('enrollments', EnrollmentController::class);
+});
 // Attendance routes (available to teachers and admins)
 Route::get('teacher/attendance', [App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');
 Route::resource('teacher/attendance', AttendanceController::class)->except(['index']);
@@ -354,7 +364,7 @@ Route::group(['prefix' => 'analytics'], function () {
 });
 
 // Calendar Routes
-Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], function () {
+    Route::group(['prefix' => 'calendar', 'middleware' => ['role:Admin,Teacher']], function () {
     Route::get('/', [App\Http\Controllers\CalendarEventController::class, 'index'])->name('calendar.index');
     Route::get('/create', [App\Http\Controllers\CalendarEventController::class, 'create'])->name('calendar.create');
     Route::post('/', [App\Http\Controllers\CalendarEventController::class, 'store'])->name('calendar.store');
@@ -492,32 +502,62 @@ Route::group(['prefix' => 'messages', 'middleware' => ['auth']], function () {
 
 // Notification Routes
 Route::group(['prefix' => 'notifications', 'middleware' => ['auth']], function () {
-    Route::get('/', function() {
-        return view('notifications.index');
-    })->name('notifications.index');
+    Route::get('/', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/{id}/mark-as-read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/mark-all-as-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+});
+
+// Assignment Routes
+Route::group(['prefix' => 'assignments', 'middleware' => ['auth']], function () {
+    Route::get('/', [App\Http\Controllers\AssignmentController::class, 'index'])->name('assignments.index');
+    Route::get('/create', [App\Http\Controllers\AssignmentController::class, 'create'])->name('assignments.create');
+    Route::post('/', [App\Http\Controllers\AssignmentController::class, 'store'])->name('assignments.store');
+    Route::get('/{assignment}', [App\Http\Controllers\AssignmentController::class, 'show'])->name('assignments.show');
+    Route::get('/{assignment}/edit', [App\Http\Controllers\AssignmentController::class, 'edit'])->name('assignments.edit');
+    Route::put('/{assignment}', [App\Http\Controllers\AssignmentController::class, 'update'])->name('assignments.update');
+    Route::delete('/{assignment}', [App\Http\Controllers\AssignmentController::class, 'destroy'])->name('assignments.destroy');
     
-    Route::patch('/{id}/mark-as-read', function($id) {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsRead();
-        return response()->json(['success' => true]);
-    })->name('notifications.mark-read');
+    // Assignment management
+    Route::post('/{assignment}/publish', [App\Http\Controllers\AssignmentController::class, 'publish'])->name('assignments.publish');
+    Route::post('/{assignment}/close', [App\Http\Controllers\AssignmentController::class, 'close'])->name('assignments.close');
+    Route::get('/{assignment}/submissions', [App\Http\Controllers\AssignmentController::class, 'submissions'])->name('assignments.submissions');
     
-    Route::patch('/{id}/mark-as-unread', function($id) {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->markAsUnread();
-        return response()->json(['success' => true]);
-    })->name('notifications.mark-unread');
+    // Grading
+    Route::post('/submissions/{submission}/grade', [App\Http\Controllers\AssignmentController::class, 'gradeSubmission'])->name('assignments.grade-submission');
     
-    Route::delete('/{id}', function($id) {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-        $notification->delete();
-        return response()->json(['success' => true]);
-    })->name('notifications.delete');
+    // Export
+    Route::get('/{assignment}/export-pdf', [App\Http\Controllers\AssignmentController::class, 'exportPdf'])->name('assignments.export-pdf');
+    Route::get('/export-excel', [App\Http\Controllers\AssignmentController::class, 'exportExcel'])->name('assignments.export-excel');
+});
+
+// Class Post Routes
+Route::group(['prefix' => 'class-posts', 'middleware' => ['auth']], function () {
+    Route::get('/', [App\Http\Controllers\ClassPostController::class, 'index'])->name('class-posts.index');
+    Route::get('/create', [App\Http\Controllers\ClassPostController::class, 'create'])->name('class-posts.create');
+    Route::post('/', [App\Http\Controllers\ClassPostController::class, 'store'])->name('class-posts.store');
+    Route::get('/{classPost}', [App\Http\Controllers\ClassPostController::class, 'show'])->name('class-posts.show');
+    Route::get('/{classPost}/edit', [App\Http\Controllers\ClassPostController::class, 'edit'])->name('class-posts.edit');
+    Route::put('/{classPost}', [App\Http\Controllers\ClassPostController::class, 'update'])->name('class-posts.update');
+    Route::delete('/{classPost}', [App\Http\Controllers\ClassPostController::class, 'destroy'])->name('class-posts.destroy');
     
-    Route::patch('/mark-all-read', function() {
-        auth()->user()->unreadNotifications->markAsRead();
-        return response()->json(['success' => true]);
-    })->name('notifications.mark-all-read');
+    // Post management
+    Route::post('/{classPost}/toggle-pin', [App\Http\Controllers\ClassPostController::class, 'togglePin'])->name('class-posts.toggle-pin');
+    Route::post('/{classPost}/publish', [App\Http\Controllers\ClassPostController::class, 'publish'])->name('class-posts.publish');
+    Route::post('/{classPost}/unpublish', [App\Http\Controllers\ClassPostController::class, 'unpublish'])->name('class-posts.unpublish');
+    
+    // Comments
+    Route::post('/{classPost}/comments', [App\Http\Controllers\ClassPostController::class, 'storeComment'])->name('class-posts.store-comment');
+    Route::delete('/comments/{comment}', [App\Http\Controllers\ClassPostController::class, 'deleteComment'])->name('class-posts.delete-comment');
+    Route::patch('/comments/{comment}/toggle-approval', [App\Http\Controllers\ClassPostController::class, 'toggleCommentApproval'])->name('class-posts.toggle-comment-approval');
+});
+
+// Student Assignment Routes
+Route::group(['prefix' => 'student', 'middleware' => ['auth', 'role:Student']], function () {
+    Route::get('/assignments', [App\Http\Controllers\StudentAssignmentController::class, 'index'])->name('student.assignments.index');
+    Route::get('/assignments/{assignment}', [App\Http\Controllers\StudentAssignmentController::class, 'show'])->name('student.assignments.show');
+    Route::post('/assignments/{assignment}/submit', [App\Http\Controllers\StudentAssignmentController::class, 'submit'])->name('student.assignments.submit');
+    Route::get('/assignments/{assignment}/submission', [App\Http\Controllers\StudentAssignmentController::class, 'submission'])->name('student.assignments.submission');
 });
 
 // Parent Routes

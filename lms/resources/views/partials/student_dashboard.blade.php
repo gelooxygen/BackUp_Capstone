@@ -15,6 +15,51 @@
     </div>
 </div>
 
+{{-- Quick Actions Section --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-graduation-cap text-primary me-2"></i>My Learning
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('student.assignments.index') }}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-tasks fa-2x mb-2"></i>
+                            <span class="fw-bold">My Assignments</span>
+                            <small class="text-muted">View & submit</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="#" class="btn btn-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-book fa-2x mb-2"></i>
+                            <span class="fw-bold">My Lessons</span>
+                            <small class="text-muted">Access materials</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="#" class="btn btn-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-bullhorn fa-2x mb-2"></i>
+                            <span class="fw-bold">Class Posts</span>
+                            <small class="text-muted">Read announcements</small>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="#" class="btn btn-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-chart-line fa-2x mb-2"></i>
+                            <span class="fw-bold">My Progress</span>
+                            <small class="text-muted">Track performance</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-xl-3 col-sm-6 col-12 d-flex">
         <div class="card bg-comman w-100">
