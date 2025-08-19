@@ -3,9 +3,15 @@
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="page-header">
-            <div class="row">
-                <div class="col-sm-12">
+            <div class="row align-items-center">
+                <div class="col">
                     <h3 class="page-title">Add Section</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('class-subject.unified-management') }}">Class & Subject Management</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('sections.index') }}">Sections</a></li>
+                        <li class="breadcrumb-item active">Add Section</li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -39,7 +45,10 @@
                         <textarea name="description" id="description" class="form-control">{{ old('description') }}</textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Create Section</button>
-                    <a href="{{ route('sections.index') }}" class="btn btn-secondary">Back</a>
+                    <a href="{{ route('class-subject.unified-management') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Management
+                    </a>
+                </div>
                 </div>
             </div>
         </form>

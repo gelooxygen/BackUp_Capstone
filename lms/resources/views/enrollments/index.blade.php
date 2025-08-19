@@ -15,6 +15,9 @@
                     </ul>
                 </div>
                 <div class="col-auto text-right float-right ml-auto">
+                    <a href="{{ route('class-subject.unified-management') }}" class="btn btn-success me-2">
+                        <i class="fas fa-cogs"></i> Class & Subject Management
+                    </a>
                     <a href="{{ route('enrollments.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Create New User
                     </a>

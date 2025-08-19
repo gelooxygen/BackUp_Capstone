@@ -3,9 +3,19 @@
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="page-header">
-            <div class="row">
-                <div class="col-sm-12">
+            <div class="row align-items-center">
+                <div class="col">
                     <h3 class="page-title">Sections</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('class-subject.unified-management') }}">Class & Subject Management</a></li>
+                        <li class="breadcrumb-item active">Sections</li>
+                    </ul>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ route('class-subject.unified-management') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Management
+                    </a>
                 </div>
             </div>
         </div>
@@ -34,7 +44,6 @@
                             <td>{{ $section->capacity }}</td>
                             <td>{{ $section->description }}</td>
                             <td>
-                                <a href="{{ route('sections.assignStudentsForm', $section->id) }}" class="btn btn-sm btn-info">Assign Students</a>
                                 <a href="{{ route('sections.edit', $section->id) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <form action="{{ route('sections.destroy', $section->id) }}" method="POST" style="display:inline-block;">
                                     @csrf

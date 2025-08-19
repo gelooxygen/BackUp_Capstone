@@ -33,6 +33,11 @@ class Student extends Model
     {
         return $this->belongsToMany(Section::class, 'section_student', 'student_id', 'section_id');
     }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
 
     public function attendances() {
         return $this->hasMany(Attendance::class);

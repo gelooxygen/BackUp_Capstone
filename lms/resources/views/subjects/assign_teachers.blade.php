@@ -21,7 +21,7 @@
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="teacher_ids[]" value="{{ $teacher->id }}" id="teacher{{ $teacher->id }}" {{ in_array($teacher->id, $assigned) ? 'checked' : '' }}>
                                         <label class="form-check-label" for="teacher{{ $teacher->id }}">
-                                            {{ $teacher->full_name }}
+                                            {{ $teacher->full_name ?: $teacher->user->name ?? 'Unknown Teacher' }}
                                         </label>
                                     </div>
                                 </div>

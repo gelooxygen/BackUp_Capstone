@@ -46,7 +46,7 @@
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>Teacher ID <span class="login-danger">*</span></label>
-                                        <input type="text" class="form-control" name="teacher_id" id="teacher_id" placeholder="Teacher ID" value="{{ old('teacher_id') }}" readonly>
+                                        <input type="text" class="form-control" name="user_id" id="teacher_id" placeholder="Teacher ID" value="{{ old('user_id') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-12 col-sm-4">
@@ -115,7 +115,7 @@
                                 </div>
                                 <div class="col-12 col-sm-6">
                                     <div class="form-group local-forms">
-                                        <label>Phone </label>
+                                        <label>Phone <span class="login-danger">*</span></label>
                                         <input class="form-control @error('phone_number') is-invalid @enderror" type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1').replace(/^0[^.]/, '0');" name="phone_number" placeholder="Enter Phone Number" value="{{ old('phone_number') }}">
                                         @error('phone_number')
                                             <span class="invalid-feedback" role="alert">

@@ -34,6 +34,14 @@ class Teacher extends Model
     }
 
     /**
+     * Get the user associated with this teacher
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    /**
      * Get the teacher's full name
      */
     public function getFullNameAttribute()

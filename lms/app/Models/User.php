@@ -10,6 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Message;
+use App\Models\ClassPostComment;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -81,6 +83,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function teacher()
     {
         return $this->hasOne(Teacher::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Get the messages sent by this user.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Get the messages received by this user.
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'recipient_id');
+    }
+
+    /**
+     * Get the class post comments by this user.
+     */
+    public function classPostComments()
+    {
+        return $this->hasMany(ClassPostComment::class, 'user_id');
     }
 
     /**

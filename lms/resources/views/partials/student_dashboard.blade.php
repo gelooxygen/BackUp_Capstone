@@ -27,10 +27,10 @@
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6 col-lg-3">
-                        <a href="{{ route('student.assignments.index') }}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                            <i class="fas fa-tasks fa-2x mb-2"></i>
-                            <span class="fw-bold">My Assignments</span>
-                            <small class="text-muted">View & submit</small>
+                        <a href="{{ route('student.my-classes') }}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                            <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                            <span class="fw-bold">My Classes</span>
+                            <small class="text-muted">View & manage</small>
                         </a>
                     </div>
                     <div class="col-md-6 col-lg-3">

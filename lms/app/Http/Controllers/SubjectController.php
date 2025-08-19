@@ -115,8 +115,36 @@ class SubjectController extends Controller
     public function assignTeachersForm($id)
     {
         $subject = Subject::findOrFail($id);
-        $teachers = \App\Models\Teacher::all();
+        
+        // Get all users with Teacher role
+        $teacherUsers = \App\Models\User::where('role_name', 'Teacher')->get();
+        
+        // Create teacher records for users who don't have them
+        foreach ($teacherUsers as $user) {
+            if (!\App\Models\Teacher::where('user_id', $user->user_id)->exists()) {
+                \App\Models\Teacher::create([
+                    'user_id' => $user->user_id,
+                    'full_name' => $user->name,
+                    'phone_number' => $user->phone_number,
+                    'address' => '', // Default empty
+                    'gender' => '', // Default empty
+                    'date_of_birth' => null,
+                    'qualification' => '', // Default empty
+                    'experience' => '', // Default empty
+                    'upload' => 'photo_defaults.jpg', // Default avatar
+                ]);
+            }
+        }
+        
+        // Only get teachers who have valid user relationships with role "Teacher"
+        $teachers = \App\Models\Teacher::with('user')
+            ->whereHas('user', function($query) {
+                $query->where('role_name', 'Teacher');
+            })
+            ->get();
+            
         $assigned = $subject->teachers->pluck('id')->toArray();
+        
         return view('subjects.assign_teachers', compact('subject', 'teachers', 'assigned'));
     }
 
@@ -125,7 +153,11 @@ class SubjectController extends Controller
     {
         $subject = Subject::findOrFail($id);
         $teacherIds = $request->input('teacher_ids', []);
-        $subject->teachers()->sync($teacherIds);
+        
+        // Ensure all teacher IDs exist in the teachers table
+        $validTeacherIds = \App\Models\Teacher::whereIn('id', $teacherIds)->pluck('id')->toArray();
+        
+        $subject->teachers()->sync($validTeacherIds);
         \Brian2694\Toastr\Facades\Toastr::success('Teachers assigned successfully :)', 'Success');
         return redirect()->route('subject/list/page');
     }

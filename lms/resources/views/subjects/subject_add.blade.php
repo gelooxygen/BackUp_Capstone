@@ -10,9 +10,16 @@
                     <div class="col">
                         <h3 class="page-title">Add Subject</h3>
                         <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="subjects.html">Subject</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('class-subject.unified-management') }}">Class & Subject Management</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('subject/list/page') }}">Subjects</a></li>
                             <li class="breadcrumb-item active">Add Subject</li>
                         </ul>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('class-subject.unified-management') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Management
+                        </a>
                     </div>
                 </div>
             </div>
@@ -42,6 +49,9 @@
                                     <div class="col-12">
                                         <div class="student-submit">
                                             <button type="submit" class="btn btn-primary">Submit</button>
+                                            <a href="{{ route('class-subject.unified-management') }}" class="btn btn-secondary ms-2">
+                                                <i class="fas fa-arrow-left"></i> Back to Management
+                                            </a>
                                         </div>
                                     </div>
                                 </div>

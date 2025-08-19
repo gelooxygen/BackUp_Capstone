@@ -23,7 +23,8 @@ class TeacherController extends Controller
     public function teacherList()
     {
         $query = Teacher::join('users', 'teachers.user_id','users.user_id')
-                    ->select('users.date_of_birth','users.join_date','users.phone_number','teachers.*');
+                    ->select('users.date_of_birth','users.join_date','users.phone_number as user_phone','teachers.*')
+                    ->where('users.role_name', 'Teacher'); // Only show teachers with valid Teacher role
         
         // Search/Filter logic
         if ($id = request('search_id')) {
@@ -43,7 +44,11 @@ class TeacherController extends Controller
     /** teacher Grid */
     public function teacherGrid()
     {
-        $teacherGrid = Teacher::all();
+        $teacherGrid = Teacher::with('user')
+            ->whereHas('user', function($query) {
+                $query->where('role_name', 'Teacher');
+            })
+            ->get();
         return view('teacher.teachers-grid',compact('teacherGrid'));
     }
 
@@ -68,7 +73,7 @@ class TeacherController extends Controller
 
             $saveRecord = new Teacher;
             $saveRecord->full_name     = $request->full_name;
-            $saveRecord->user_id       = $request->teacher_id;
+            $saveRecord->user_id       = $request->user_id;
             $saveRecord->gender        = $request->gender;
             $saveRecord->experience    = $request->experience;
             $saveRecord->qualification = $request->qualification;
@@ -138,10 +143,15 @@ class TeacherController extends Controller
     {
         DB::beginTransaction();
         try {
-
-            Teacher::destroy($request->id);
-            DB::commit();
-            Toastr::success('Deleted record successfully :)','Success');
+            // Find teacher by user_id and delete
+            $teacher = Teacher::where('user_id', $request->id)->first();
+            if ($teacher) {
+                $teacher->delete();
+                DB::commit();
+                Toastr::success('Deleted record successfully :)','Success');
+            } else {
+                Toastr::error('Teacher not found :)','Error');
+            }
             return redirect()->back();
         } catch(\Exception $e) {
             DB::rollback();
@@ -172,5 +182,46 @@ class TeacherController extends Controller
             $teacher->gradeLevels()->create(['grade_level' => $level]);
         }
         return redirect()->route('teacher/list/page')->with('success', 'Grade levels assigned successfully.');
+    }
+
+    /** Sync all teacher users with teachers table */
+    public function syncTeacherUsers()
+    {
+        try {
+            // Get all users with Teacher role
+            $teacherUsers = User::where('role_name', 'Teacher')->get();
+            $syncedCount = 0;
+            
+            foreach ($teacherUsers as $user) {
+                // Check if teacher record already exists
+                $existingTeacher = Teacher::where('user_id', $user->user_id)->first();
+                
+                if (!$existingTeacher) {
+                    // Create teacher record
+                    Teacher::create([
+                        'user_id' => $user->user_id,
+                        'full_name' => $user->name,
+                        'phone_number' => $user->phone_number ?? 'Not specified',
+                        'address' => 'Not specified',
+                        'city' => 'Not specified',
+                        'state' => 'Not specified',
+                        'zip_code' => 'Not specified',
+                        'country' => 'Not specified',
+                        'gender' => 'Not specified',
+                        'date_of_birth' => 'Not specified',
+                        'qualification' => 'Not specified',
+                        'experience' => 'Not specified'
+                    ]);
+                    $syncedCount++;
+                }
+            }
+            
+            Toastr::success("Successfully synced $syncedCount teacher users", 'Success');
+            return redirect()->back();
+            
+        } catch (\Exception $e) {
+            Toastr::error('Failed to sync teacher users: ' . $e->getMessage(), 'Error');
+            return redirect()->back();
+        }
     }
 }

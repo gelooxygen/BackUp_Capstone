@@ -152,7 +152,19 @@
 		{{-- content page --}}
         @yield('content')
         <footer>
-            <p>Copyright ©  <?php echo date('Y'); ?> Panorama Montessori School.</p>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <div class="footer-logo">
+                        <img src="{{ asset('assets/img/Logo.jpg') }}" alt="Panorama Montessori School Logo" class="school-logo">
+                    </div>
+                    <div class="footer-divider"></div>
+                    <span class="system-name">Panorama Montessori School Portal</span>
+                </div>
+                <div class="footer-right">
+                    <span class="motto">FOSTERING A PASSION</span>
+                    <span class="motto-subtitle">for EXCELLENCE</span>
+                </div>
+            </div>
         </footer>
     
     </div>
@@ -174,6 +186,178 @@
     @yield('script')
     
     <style>
+    /* Footer styling */
+    footer {
+        background: white;
+        padding: 15px 20px;
+        border-top: 1px solid #e9ecef;
+        margin-top: auto;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        flex-wrap: wrap;
+        gap: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-logo .school-logo {
+        height: 40px;
+        width: auto;
+        max-width: 120px;
+        object-fit: contain;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-divider {
+        width: 1px;
+        height: 30px;
+        background-color: #6c757d;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .system-name {
+        color: #495057;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-right {
+        text-align: right;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .motto {
+        display: block;
+        color: #495057;
+        font-weight: bold;
+        font-style: italic;
+        font-size: 16px;
+        margin-bottom: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    .motto-subtitle {
+        display: block;
+        color: #495057;
+        font-style: italic;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    /* Sidebar Open State - Footer adjusts to sidebar */
+    body.sidebar-open footer {
+        margin-left: 259px; /* Full sidebar width */
+        width: calc(100% - 259px); /* Constrain width when sidebar is open */
+        transition: all 0.3s ease;
+    }
+    
+    /* Sidebar Closed State - Footer adjusts to mini sidebar */
+    body.sidebar-closed footer {
+        margin-left: 78px; /* Mini sidebar width */
+        width: calc(100% - 78px); /* Adjust width for mini sidebar */
+        transition: all 0.3s ease;
+    }
+    
+    /* Ensure footer content expands properly */
+    body.sidebar-closed .footer-content {
+        max-width: calc(100% - 40px);
+        padding: 0 20px;
+    }
+    
+    body.sidebar-open .footer-content {
+        max-width: calc(100% - 40px);
+        padding: 0 20px;
+    }
+    
+    /* Mobile responsive - footer takes full width */
+    @media (max-width: 991px) {
+        body.sidebar-open footer,
+        body.sidebar-closed footer {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        /* Remove sidebar margin on mobile */
+        body.sidebar-open footer,
+        body.sidebar-closed footer {
+            margin-left: 0;
+        }
+        
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 20px;
+        }
+        
+        .footer-left {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .footer-divider {
+            display: none;
+        }
+        
+        .footer-right {
+            text-align: center;
+        }
+        
+        .system-name {
+            font-size: 14px;
+        }
+        
+        .motto {
+            font-size: 14px;
+        }
+        
+        .motto-subtitle {
+            font-size: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        footer {
+            padding: 15px 10px;
+        }
+        
+        .footer-logo .school-logo {
+            height: 35px;
+            max-width: 100px;
+        }
+        
+        .system-name {
+            font-size: 13px;
+        }
+        
+        .motto {
+            font-size: 13px;
+        }
+        
+        .motto-subtitle {
+            font-size: 11px;
+        }
+    }
+    
     /* Notification badge styling */
     .noti-dropdown .badge {
         position: absolute;
@@ -240,6 +424,60 @@
         $(document).ready(function() {
             $('.select2s-hidden-accessible').select2({
                 closeOnSelect: false
+            });
+            
+            // Footer responsive behavior based on sidebar state
+            function updateFooterState() {
+                const sidebar = $('#sidebar');
+                const body = $('body');
+                const footer = $('footer');
+                
+                // Check if sidebar is in mini-sidebar mode (collapsed)
+                if (body.hasClass('mini-sidebar')) {
+                    body.removeClass('sidebar-open').addClass('sidebar-closed');
+                    footer.css({
+                        'margin-left': '78px', // Mini sidebar width
+                        'width': 'calc(100% - 78px)'
+                    });
+                } else {
+                    body.removeClass('sidebar-closed').addClass('sidebar-open');
+                    footer.css({
+                        'margin-left': '259px', // Full sidebar width
+                        'width': 'calc(100% - 259px)'
+                    });
+                }
+            }
+            
+            // Initial state check
+            updateFooterState();
+            
+            // Listen for sidebar toggle button clicks
+            $(document).on('click', '#toggle_btn', function() {
+                setTimeout(updateFooterState, 300); // Wait for animation to complete
+            });
+            
+            // Listen for mobile sidebar toggle
+            $(document).on('click', '#mobile_btn, .sidebar-overlay', function() {
+                setTimeout(updateFooterState, 300); // Wait for animation to complete
+            });
+            
+            // Listen for window resize
+            $(window).on('resize', function() {
+                updateFooterState();
+            });
+            
+            // Listen for body class changes (for mini-sidebar)
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        setTimeout(updateFooterState, 100);
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class']
             });
         });
 

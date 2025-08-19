@@ -234,30 +234,54 @@ class StudentController extends Controller
         $presentAttendance = $student->attendanceRecords()->where('status', 'present')->count();
         $attendanceRate = $totalAttendance > 0 ? round(($presentAttendance / $totalAttendance) * 100, 1) : 0;
         
-        // Get upcoming deadlines (placeholder data - can be enhanced with real assignment data)
-        $upcomingDeadlines = collect([
-            [
-                'title' => 'Math Assignment #3',
+        // Get real assignment data for each enrollment
+        foreach ($enrollments as $enrollment) {
+            $enrollment->assignment_count = \App\Models\Assignment::where('subject_id', $enrollment->subject_id)
+                ->where('status', 'published')
+                ->where('is_active', true)
+                ->count();
+            
+            $enrollment->pending_assignments = \App\Models\Assignment::where('subject_id', $enrollment->subject_id)
+                ->where('status', 'published')
+                ->where('is_active', true)
+                ->whereDoesntHave('submissions', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                })
+                ->count();
+            
+            $enrollment->overdue_assignments = \App\Models\Assignment::where('subject_id', $enrollment->subject_id)
+                ->where('status', 'published')
+                ->where('is_active', true)
+                ->where('due_date', '<', now())
+                ->whereDoesntHave('submissions', function($q) use ($student) {
+                    $q->where('student_id', $student->id);
+                })
+                ->count();
+        }
+        
+        // Get upcoming deadlines from real assignments
+        $upcomingAssignments = \App\Models\Assignment::whereIn('subject_id', $enrollments->pluck('subject_id'))
+            ->where('status', 'published')
+            ->where('is_active', true)
+            ->where('due_date', '>', now())
+            ->whereDoesntHave('submissions', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->with(['subject'])
+            ->orderBy('due_date', 'asc')
+            ->limit(5)
+            ->get();
+        
+        $upcomingDeadlines = $upcomingAssignments->map(function($assignment) {
+            return [
+                'title' => $assignment->title,
                 'type' => 'assignment',
-                'due_date' => now()->addDays(2),
-                'subject' => 'Mathematics',
-                'icon' => 'fas fa-file-alt'
-            ],
-            [
-                'title' => 'Science Quiz',
-                'type' => 'quiz',
-                'due_date' => now()->addDays(5),
-                'subject' => 'Science',
-                'icon' => 'fas fa-question-circle'
-            ],
-            [
-                'title' => 'Online Class',
-                'type' => 'class',
-                'due_date' => now(),
-                'subject' => 'English',
-                'icon' => 'fas fa-video'
-            ]
-        ]);
+                'due_date' => $assignment->due_date,
+                'subject' => $assignment->subject->subject_name,
+                'icon' => 'fas fa-file-alt',
+                'is_overdue' => false
+            ];
+        });
         
         // Calculate performance overview
         $performanceStats = [
@@ -298,10 +322,59 @@ class StudentController extends Controller
             return redirect()->back()->with('error', 'Class not found or access denied.');
         }
         
+        // Get assignments for this specific subject
+        $assignments = \App\Models\Assignment::with(['teacher', 'subject', 'section'])
+            ->where('subject_id', $enrollment->subject_id)
+            ->where('status', 'published')
+            ->where('is_active', true)
+            ->orderBy('due_date', 'asc')
+            ->get();
+        
+        // Get quizzes/exams (using Activity model) for this subject
+        $quizzes = \App\Models\Activity::with(['lesson.teacher', 'lesson.subject', 'lesson.section'])
+            ->whereHas('lesson', function($query) use ($enrollment) {
+                $query->where('subject_id', $enrollment->subject_id)
+                      ->where('is_active', true);
+            })
+            ->where('is_active', true)
+            ->orderBy('due_date', 'asc')
+            ->get();
+        
+        // Get online classes (using Lesson model) for this subject
+        $onlineClasses = \App\Models\Lesson::with(['teacher', 'subject', 'section'])
+            ->where('subject_id', $enrollment->subject_id)
+            ->where('is_active', true)
+            ->where('status', 'published')
+            ->orderBy('lesson_date', 'desc')
+            ->get();
+        
+        // Get class posts for this subject
+        $classPosts = \App\Models\ClassPost::with(['teacher', 'subject', 'section'])
+            ->where('subject_id', $enrollment->subject_id)
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get grades for this subject
+        $grades = $student->grades()
+            ->where('subject_id', $enrollment->subject_id)
+            ->with(['teacher', 'component', 'academicYear', 'semester'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
         // Get the active tab from request
         $activeTab = request('tab', 'assignments');
         
-        return view('student.class-detail', compact('student', 'enrollment', 'activeTab'));
+        return view('student.class-detail', compact(
+            'student', 
+            'enrollment', 
+            'activeTab', 
+            'assignments', 
+            'quizzes',
+            'onlineClasses',
+            'classPosts', 
+            'grades'
+        ));
     }
 
     /** student grades page */

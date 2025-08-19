@@ -1,0 +1,616 @@
+@extends('layouts.master')
+@section('content')
+{{-- message --}}
+{!! Toastr::message() !!}
+
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Bulk Enrollment Management</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('enrollments.index') }}">Enrollments</a></li>
+                        <li class="breadcrumb-item active">Bulk Enrollment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Bulk Enrollment Operations</h5>
+                        <p class="card-text text-muted">Choose your enrollment type and configure the settings below.</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Enrollment Type Selection -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Enrollment Type <span class="text-danger">*</span></label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check enrollment-type-option">
+                                                <input class="form-check-input" type="radio" name="enrollment_type" id="type_students_to_subject" value="students_to_subject" checked>
+                                                <label class="form-check-label" for="type_students_to_subject">
+                                                    <i class="fas fa-users text-primary"></i>
+                                                    <strong>Assign Multiple Students to One Subject</strong>
+                                                    <small class="d-block text-muted">Enroll many students in a single subject</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check enrollment-type-option">
+                                                <input class="form-check-input" type="radio" name="enrollment_type" id="type_subjects_to_student" value="subjects_to_student">
+                                                <label class="form-check-label" for="type_subjects_to_student">
+                                                    <i class="fas fa-book-open text-success"></i>
+                                                    <strong>Assign Multiple Subjects to One Student</strong>
+                                                    <small class="d-block text-muted">Enroll one student in multiple subjects</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- Dynamic Form Content -->
+                        <div id="dynamicFormContent">
+                            <!-- Content will be loaded here based on enrollment type -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@section('script')
+<script>
+$(document).ready(function() {
+    // Initial load
+    loadFormContent();
+    
+    // Listen for enrollment type changes
+    $('input[name="enrollment_type"]').change(function() {
+        loadFormContent();
+    });
+});
+
+function loadFormContent() {
+    const enrollmentType = $('input[name="enrollment_type"]:checked').val();
+    
+    if (enrollmentType === 'students_to_subject') {
+        loadStudentsToSubjectForm();
+    } else {
+        loadSubjectsToStudentForm();
+    }
+}
+
+function loadStudentsToSubjectForm() {
+    const formHtml = `
+        <form method="POST" action="{{ route('bulk-enrollment.assign-students-to-subject') }}" id="bulkEnrollmentForm">
+            @csrf
+            <input type="hidden" name="enrollment_type" value="students_to_subject">
+            
+            <div class="row">
+                <!-- Subject Selection -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="subject_id">Subject <span class="text-danger">*</span></label>
+                        <select class="form-control @error('subject_id') is-invalid @enderror" name="subject_id" id="subject_id" required>
+                            <option value="">Select Subject</option>
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>
+                                    {{ $subject->subject_name }} ({{ $subject->class }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('subject_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="academic_year_id">Academic Year <span class="text-danger">*</span></label>
+                        <select class="form-control @error('academic_year_id') is-invalid @enderror" name="academic_year_id" id="academic_year_id" required>
+                            <option value="">Select Academic Year</option>
+                            @foreach($academicYears as $year)
+                                <option value="{{ $year->id }}" {{ old('academic_year_id') == $year->id ? 'selected' : '' }}>
+                                    {{ $year->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('academic_year_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Semester -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="semester_id">Semester <span class="text-danger">*</span></label>
+                        <select class="form-control @error('semester_id') is-invalid @enderror" name="semester_id" id="semester_id" required>
+                            <option value="">Select Semester</option>
+                            @foreach($semesters as $semester)
+                                <option value="{{ $semester->id }}" {{ old('semester_id') == $semester->id ? 'selected' : '' }}>
+                                    {{ $semester->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('semester_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Section (Optional) -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="section_id">Section (Optional)</label>
+                        <select class="form-control @error('section_id') is-invalid @enderror" name="section_id" id="section_id">
+                            <option value="">Select Section (Optional)</option>
+                            @foreach($sections as $section)
+                                <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                    {{ $section->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('section_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Student Selection -->
+            <div class="form-group">
+                <label>Select Students <span class="text-danger">*</span></label>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="studentSearch" placeholder="Search students by name, admission ID, or email...">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="searchStudents">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Available Students</h6>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllStudents()">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllStudents()">Deselect All</button>
+                            </div>
+                        </div>
+                        
+                        <div id="studentsList" class="row">
+                            <!-- Students will be loaded here via AJAX -->
+                        </div>
+                        
+                        @error('student_ids')
+                            <div class="alert alert-danger mt-3">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mt-4">
+                <a href="{{ route('enrollments.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i> Enroll Selected Students
+                </button>
+            </div>
+        </form>
+    `;
+    
+    $('#dynamicFormContent').html(formHtml);
+    
+    // Load students after form is created
+    setTimeout(function() {
+        searchStudents();
+    }, 100);
+}
+
+function loadSubjectsToStudentForm() {
+    const formHtml = `
+        <form method="POST" action="{{ route('bulk-enrollment.assign-subjects-to-student') }}" id="bulkEnrollmentForm">
+            @csrf
+            <input type="hidden" name="enrollment_type" value="subjects_to_student">
+            
+            <div class="row">
+                <!-- Student Selection -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="student_id">Student <span class="text-danger">*</span></label>
+                        <select class="form-control @error('student_id') is-invalid @enderror" name="student_id" id="student_id" required>
+                            <option value="">Select Student</option>
+                            @foreach($students as $student)
+                                @php
+                                    $fullName = trim($student->first_name . ' ' . $student->last_name);
+                                    if (!$fullName && $student->user) {
+                                        $fullName = $student->user->name;
+                                    }
+                                @endphp
+                                <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                                    {{ $fullName ?: 'Unknown Name' }}
+                                    @if($student->admission_id)
+                                        ({{ $student->admission_id }})
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('student_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="academic_year_id">Academic Year <span class="text-danger">*</span></label>
+                        <select class="form-control @error('academic_year_id') is-invalid @enderror" name="academic_year_id" id="academic_year_id" required>
+                            <option value="">Select Academic Year</option>
+                            @foreach($academicYears as $year)
+                                <option value="{{ $year->id }}" {{ old('academic_year_id') == $year->id ? 'selected' : '' }}>
+                                    {{ $year->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('academic_year_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Semester -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="semester_id">Semester <span class="text-danger">*</span></label>
+                        <select class="form-control @error('semester_id') is-invalid @enderror" name="semester_id" id="semester_id" required>
+                            <option value="">Select Semester</option>
+                            @foreach($semesters as $semester)
+                                <option value="{{ $semester->id }}" {{ old('semester_id') == $semester->id ? 'selected' : '' }}>
+                                    {{ $semester->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('semester_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Section (Optional) -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="section_id">Section (Optional)</label>
+                        <select class="form-control @error('section_id') is-invalid @enderror" name="section_id" id="section_id">
+                            <option value="">Select Section (Optional)</option>
+                            @foreach($sections as $section)
+                                <option value="{{ $section->id }}" {{ old('section_id') == $section->id ? 'selected' : '' }}>
+                                    {{ $section->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('section_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Subject Selection -->
+            <div class="form-group">
+                <label>Select Subjects <span class="text-danger">*</span></label>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="subjectSearch" placeholder="Search subjects by name or class...">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="searchSubjects">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6>Available Subjects</h6>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllSubjects()">Select All</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllSubjects()">Deselect All</button>
+                            </div>
+                        </div>
+                        
+                        <div id="subjectsList" class="row">
+                            <!-- Subjects will be loaded here via AJAX -->
+                        </div>
+                        
+                        @error('subject_ids')
+                            <div class="alert alert-danger mt-3">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end mt-4">
+                <a href="{{ route('enrollments.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-save"></i> Enroll Student in Selected Subjects
+                </button>
+                </div>
+        </form>
+    `;
+    
+    $('#dynamicFormContent').html(formHtml);
+    
+    // Load subjects after form is created
+    setTimeout(function() {
+        searchSubjects();
+    }, 100);
+}
+
+// Student search functions
+function searchStudents() {
+    var searchTerm = $('#studentSearch').val();
+    
+    $.ajax({
+        url: '{{ route("bulk-enrollment.get-students") }}',
+        method: 'GET',
+        data: { search: searchTerm },
+        success: function(response) {
+            displayStudents(response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching students:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            
+            var errorMessage = 'Error loading students. ';
+            if (xhr.status === 500) {
+                errorMessage += 'Server error. Check console for details.';
+            } else if (xhr.status === 404) {
+                errorMessage += 'Route not found.';
+            } else if (xhr.status === 403) {
+                errorMessage += 'Access denied. Please check your permissions.';
+            } else {
+                errorMessage += 'Please try again.';
+            }
+            
+            $('#studentsList').html('<div class="col-12"><div class="alert alert-danger">' + errorMessage + '</div></div>');
+        }
+    });
+}
+
+function displayStudents(students) {
+    var html = '';
+    
+    if (students.length === 0) {
+        html = '<div class="col-12"><div class="alert alert-info">No students found matching your search criteria.</div></div>';
+    } else {
+        students.forEach(function(student) {
+            var fullName = (student.first_name + ' ' + student.last_name).trim();
+            if (!fullName) fullName = student.user ? student.user.name : 'Unknown Name';
+            
+            html += `
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="student-checkbox-card">
+                        <div class="form-check">
+                            <input class="form-check-input student-checkbox" type="checkbox" 
+                                   name="student_ids[]" value="${student.id}" 
+                                   id="student${student.id}">
+                            <label class="form-check-label" for="student${student.id}">
+                                <div class="student-info">
+                                    <strong>${fullName}</strong>
+                                    ${student.admission_id ? '<br><small class="text-muted">ID: ' + student.admission_id + '</small>' : ''}
+                                    ${student.user && student.user.email ? '<br><small class="text-muted">' + student.user.email + '</small>' : ''}
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    $('#studentsList').html(html);
+}
+
+function selectAllStudents() {
+    $('.student-checkbox').prop('checked', true);
+}
+
+function deselectAllStudents() {
+    $('.student-checkbox').prop('checked', false);
+}
+
+// Subject search functions
+function searchSubjects() {
+    var searchTerm = $('#subjectSearch').val();
+    
+    $.ajax({
+        url: '{{ route("bulk-enrollment.get-subjects") }}',
+        method: 'GET',
+        data: { search: searchTerm },
+        success: function(response) {
+            displaySubjects(response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching subjects:', error);
+            $('#subjectsList').html('<div class="col-12"><div class="alert alert-danger">Error loading subjects. Please try again.</div></div>');
+        }
+    });
+}
+
+function displaySubjects(subjects) {
+    var html = '';
+    
+    if (subjects.length === 0) {
+        html = '<div class="col-12"><div class="alert alert-info">No subjects found matching your search criteria.</div></div>';
+    } else {
+        subjects.forEach(function(subject) {
+            html += `
+                <div class="col-md-4 col-lg-3 mb-3">
+                    <div class="subject-checkbox-card">
+                        <div class="form-check">
+                            <input class="form-check-input subject-checkbox" type="checkbox" 
+                                   name="subject_ids[]" value="${subject.id}" 
+                                   id="subject${subject.id}">
+                            <label class="form-check-label" for="subject${subject.id}">
+                                <div class="subject-info">
+                                    <strong>${subject.subject_name}</strong>
+                                    ${subject.class ? '<br><small class="text-muted">Class: ' + subject.class + '</small>' : ''}
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    $('#subjectsList').html(html);
+}
+
+function selectAllSubjects() {
+    $('.subject-checkbox').prop('checked', true);
+}
+
+function deselectAllSubjects() {
+    $('.subject-checkbox').prop('checked', false);
+}
+
+// Form validation
+$(document).on('submit', '#bulkEnrollmentForm', function(e) {
+    const enrollmentType = $('input[name="enrollment_type"]:checked').val();
+    
+    if (enrollmentType === 'students_to_subject') {
+        var selectedStudents = $('input[name="student_ids[]"]:checked').length;
+        if (selectedStudents === 0) {
+            e.preventDefault();
+            alert('Please select at least one student to enroll.');
+            return false;
+        }
+    } else {
+        var selectedSubjects = $('input[name="subject_ids[]"]:checked').length;
+        if (selectedSubjects === 0) {
+            e.preventDefault();
+            alert('Please select at least one subject to enroll the student in.');
+            return false;
+        }
+    }
+});
+</script>
+
+<style>
+.enrollment-type-option {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.enrollment-type-option:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.enrollment-type-option input[type="radio"]:checked + label {
+    color: #007bff;
+}
+
+.enrollment-type-option input[type="radio"]:checked ~ .enrollment-type-option {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.enrollment-type-option input[type="radio"]:checked ~ .enrollment-type-option {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.enrollment-type-option input[type="radio"]:checked {
+    accent-color: #007bff;
+}
+
+.enrollment-type-option input[type="radio"]:checked + label .enrollment-type-option {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.student-checkbox-card,
+.subject-checkbox-card {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.student-checkbox-card:hover,
+.subject-checkbox-card:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+}
+
+.student-checkbox-card .form-check,
+.subject-checkbox-card .form-check {
+    margin: 0;
+}
+
+.student-checkbox-card .form-check-label,
+.subject-checkbox-card .form-check-label {
+    cursor: pointer;
+    width: 100%;
+    margin: 0;
+}
+
+.student-info,
+.subject-info {
+    margin-left: 10px;
+}
+
+.student-info strong,
+.subject-info strong {
+    color: #495057;
+    font-size: 14px;
+}
+
+.student-info small,
+.subject-info small {
+    font-size: 12px;
+    color: #6c757d;
+}
+</style>
+@endsection

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use DB;
-use Auth;
-use Session;
-use Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\User;
 use Brian2694\Toastr\Facades\Toastr;
@@ -101,15 +101,57 @@ class UserManagementController extends Controller
         try {
             if (Session::get('role_name') === 'Super Admin' || Session::get('role_name') === 'Admin')
             {
-                if ($request->avatar == 'photo_defaults.jpg')
-                {
-                    User::destroy($request->user_id);
-                } else {
-                    User::destroy($request->user_id);
-                    unlink('images/'.$request->avatar);
+                // Find the user first
+                $user = User::where('user_id', $request->user_id)->first();
+                
+                if (!$user) {
+                    Toastr::error('User not found','Error');
+                    return redirect()->back();
+                }
+
+                // Check if user is trying to delete themselves
+                if ($user->id === auth()->id()) {
+                    Toastr::error('You cannot delete your own account','Error');
+                    return redirect()->back();
+                }
+
+                // Check if user is the last admin
+                if ($user->role_name === 'Admin' && User::where('role_name', 'Admin')->count() <= 1) {
+                    Toastr::error('Cannot delete the last admin user','Error');
+                    return redirect()->back();
+                }
+
+                // Delete related records first to avoid foreign key constraint issues
+                // Delete teacher record if exists
+                if ($user->teacher) {
+                    $user->teacher->delete();
+                }
+
+                // Delete student record if exists
+                if ($user->student) {
+                    $user->student->delete();
+                }
+
+                // Delete messages where user is sender or recipient
+                DB::table('messages')->where('sender_id', $user->id)->delete();
+                DB::table('messages')->where('recipient_id', $user->id)->delete();
+
+                // Delete class post comments by this user
+                DB::table('class_post_comments')->where('user_id', $user->id)->delete();
+
+                // Delete the user
+                $user->delete();
+
+                // Delete avatar file if not default
+                if ($request->avatar && $request->avatar !== 'photo_defaults.jpg') {
+                    $avatarPath = public_path('images/' . $request->avatar);
+                    if (file_exists($avatarPath)) {
+                        unlink($avatarPath);
+                    }
                 }
             } else {
                 Toastr::error('User deleted fail :)','Error');
+                return redirect()->back();
             }
 
             DB::commit();
@@ -117,9 +159,10 @@ class UserManagementController extends Controller
             return redirect()->back();
     
         } catch(\Exception $e) {
-            Log::info($e);
+            Log::error('User deletion error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             DB::rollback();
-            Toastr::error('User deleted fail :)','Error');
+            Toastr::error('User deleted fail: ' . $e->getMessage(),'Error');
             return redirect()->back();
         }
     }

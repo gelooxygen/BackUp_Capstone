@@ -18,6 +18,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\SemesterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,10 +79,11 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
 {
     // -------------------------- main dashboard ----------------------//
     Route::controller(HomeController::class)->group(function () {
-        Route::get('/home', 'index')->middleware('auth')->name('home');
-        Route::get('/dashboard', 'dashboard')->middleware('auth')->name('dashboard');
-        Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
-        Route::get('teacher/classes', 'teacherClasses')->middleware(['auth', 'role:Teacher'])->name('teacher.classes');
+            Route::get('/home', 'index')->middleware('auth')->name('home');
+    Route::get('/dashboard', 'dashboard')->middleware('auth')->name('dashboard');
+    Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
+    Route::get('teacher/classes', 'teacherClasses')->middleware(['auth', 'role:Teacher'])->name('teacher.classes');
+    Route::get('teacher/subjects', 'teacherSubjects')->middleware(['auth', 'role:Teacher'])->name('teacher.subjects');
     });
 
     // ----------------------------- user controller ---------------------//
@@ -127,6 +129,7 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
         Route::get('teacher/edit/{user_id}', 'editRecord')->middleware(['auth', 'role:Admin']); // view teacher record
         Route::post('teacher/update', 'updateRecordTeacher')->middleware(['auth', 'role:Admin'])->name('teacher/update'); // update record
         Route::post('teacher/delete', 'teacherDelete')->middleware(['auth', 'role:Admin'])->name('teacher/delete'); // delete record teacher
+        Route::post('teacher/sync-users', 'syncTeacherUsers')->middleware(['auth', 'role:Admin'])->name('teacher/sync-users'); // sync teacher users
     });
 
     // ----------------------- department -----------------------------//
@@ -179,13 +182,34 @@ Route::group(['namespace' => 'App\Http\Controllers'],function()
     });
 });
 
-// Add resource routes for academic years and enrollments
+// Add resource routes for academic years, semesters, and enrollments
 Route::resource('academic_years', AcademicYearController::class)->middleware('auth');
+Route::resource('semesters', SemesterController::class)->middleware('auth');
 Route::resource('sections', SectionController::class)->middleware('auth');
 
 // Enrollment routes (Admin only)
 Route::group(['middleware' => ['auth', 'role:Admin']], function () {
     Route::resource('enrollments', EnrollmentController::class);
+    
+    // Bulk Enrollment Routes
+    Route::get('bulk-enrollment/combined', [App\Http\Controllers\BulkEnrollmentController::class, 'combinedBulkEnrollmentForm'])->name('bulk-enrollment.combined');
+    Route::get('bulk-enrollment/assign-students-to-subject', [App\Http\Controllers\BulkEnrollmentController::class, 'assignStudentsToSubjectForm'])->name('bulk-enrollment.assign-students-to-subject');
+    Route::post('bulk-enrollment/assign-students-to-subject', [App\Http\Controllers\BulkEnrollmentController::class, 'assignStudentsToSubject']);
+    Route::get('bulk-enrollment/assign-subjects-to-student', [App\Http\Controllers\BulkEnrollmentController::class, 'assignSubjectsToStudentForm'])->name('bulk-enrollment.assign-subjects-to-student');
+    Route::post('bulk-enrollment/assign-subjects-to-student', [App\Http\Controllers\BulkEnrollmentController::class, 'assignSubjectsToStudent']);
+    
+    // Unified Class & Subject Management Routes
+    Route::get('class-subject/unified-management', [App\Http\Controllers\ClassSubjectController::class, 'unifiedManagementForm'])->name('class-subject.unified-management');
+    Route::post('class-subject/assign-students-to-section', [App\Http\Controllers\ClassSubjectController::class, 'assignStudentsToSection'])->name('class-subject.assign-students-to-section');
+    Route::get('class-subject/get-students', [App\Http\Controllers\ClassSubjectController::class, 'getStudents'])->name('class-subject.get-students');
+    Route::get('class-subject/get-subjects', [App\Http\Controllers\ClassSubjectController::class, 'getSubjects'])->name('class-subject.get-subjects');
+    
+    // AJAX routes for search
+    Route::get('bulk-enrollment/get-students', [App\Http\Controllers\BulkEnrollmentController::class, 'getStudents'])->name('bulk-enrollment.get-students');
+    Route::get('bulk-enrollment/get-subjects', [App\Http\Controllers\BulkEnrollmentController::class, 'getSubjects'])->name('bulk-enrollment.get-subjects');
+    
+    // Test route for debugging
+    Route::get('test/students', [App\Http\Controllers\BulkEnrollmentController::class, 'testStudents']);
 });
 // Attendance routes (available to teachers and admins)
 Route::get('teacher/attendance', [App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');

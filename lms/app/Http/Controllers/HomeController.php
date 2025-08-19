@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\Enrollment;
 use App\Models\CalendarEvent;
 use App\Models\Attendance;
+use App\Models\Subject;
 
 class HomeController extends Controller
 {
@@ -51,14 +52,87 @@ class HomeController extends Controller
             return redirect()->back()->with('error', 'Teacher profile not found.');
         }
         
-        // Get teacher's subjects with sections and students
-        $teacherSubjects = $teacher->subjects()->with(['sections' => function($query) {
-            $query->with(['enrollments' => function($q) {
-                $q->with(['student'])->where('status', 'active');
-            }]);
-        }])->get();
+        // Get teacher's subjects with enrollments
+        $teacherSubjects = $teacher->subjects()
+            ->with(['enrollments' => function($query) {
+                $query->where('status', 'active')->with(['student', 'academicYear', 'semester']);
+            }])
+            ->get()
+            ->map(function($subject) {
+                $subject->enrollments_count = $subject->enrollments ? $subject->enrollments->count() : 0;
+                return $subject;
+            });
         
-        return view('teacher.classes', compact('teacher', 'teacherSubjects'));
+        // Get teacher's sections (where teacher is adviser)
+        $teacherSections = Section::where('adviser_id', $teacher->id)
+            ->with(['students'])
+            ->get()
+            ->map(function($section) {
+                $section->students_count = $section->students->count();
+                return $section;
+            });
+        
+        // Get attendance statistics for teacher's subjects
+        $attendanceStats = collect();
+        foreach ($teacherSubjects as $subject) {
+            $stats = \App\Models\Attendance::where('subject_id', $subject->id)
+                ->selectRaw('
+                    subject_id,
+                    COUNT(*) as total_records,
+                    SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count,
+                    SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_count
+                ')
+                ->groupBy('subject_id')
+                ->first();
+            
+            if ($stats) {
+                $attendanceStats->put($subject->id, $stats);
+            }
+        }
+        
+        // Get recent enrollments for teacher's subjects
+        $recentEnrollments = collect();
+        if ($teacherSubjects->count() > 0) {
+            $recentEnrollments = \App\Models\Enrollment::whereIn('subject_id', $teacherSubjects->pluck('id'))
+                ->where('status', 'active')
+                ->whereHas('student')  // Only get enrollments with valid students
+                ->whereHas('subject')  // Only get enrollments with valid subjects
+                ->with(['student', 'subject'])
+                ->orderBy('created_at', 'desc')
+                ->take(10)
+                ->get();
+        }
+        
+        return view('teacher.classes', compact('teacher', 'teacherSubjects', 'teacherSections', 'attendanceStats', 'recentEnrollments'));
+    }
+
+    public function teacherSubjects()
+    {
+        $user = auth()->user();
+        $teacher = $user->teacher;
+        
+        if (!$teacher) {
+            return redirect()->back()->with('error', 'Teacher profile not found.');
+        }
+        
+        // Get teacher's subjects with detailed information
+        $teacherSubjects = $teacher->subjects()
+            ->with(['enrollments' => function($query) {
+                $query->where('status', 'active')->with(['student', 'academicYear', 'semester']);
+            }])
+            ->get();
+        
+        // Get statistics
+        $totalSubjects = $teacherSubjects->count();
+        $totalStudents = $teacherSubjects->sum(function($subject) {
+            return $subject->enrollments->count();
+        });
+        
+        // Since subjects don't have direct sections relationship, we'll calculate this differently
+        // Get sections where this teacher is the adviser
+        $teacherSections = Section::where('adviser_id', $teacher->id)->count();
+        
+        return view('teacher.subjects', compact('teacher', 'teacherSubjects', 'totalSubjects', 'totalStudents', 'teacherSections'));
     }
 
     /**

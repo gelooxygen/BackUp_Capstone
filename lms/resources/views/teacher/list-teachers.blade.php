@@ -54,6 +54,12 @@
                                     <h3 class="page-title">Teachers</h3>
                                 </div>
                                 <div class="col-auto text-end float-end ms-auto download-grp">
+                                    <form action="{{ route('teacher/sync-users') }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning me-2" title="Sync existing teacher users">
+                                            <i class="fas fa-sync"></i> Sync
+                                        </button>
+                                    </form>
                                     <a href="teachers.html" class="btn btn-outline-gray me-2 active">
                                         <i class="fa fa-list" aria-hidden="true"></i>
                                     <a href="{{ route('teacher/grid/page') }}" class="btn btn-outline-gray me-2">
@@ -101,19 +107,19 @@
                                             <h2 class="table-avatar">
                                                 <a href="teacher-details.html" class="avatar avatar-sm me-2">
                                                     @if (!empty($list->avatar))
-                                                        <img class="avatar-img rounded-circle" src="{{ URL::to('images/'.$list->avatar) }}" alt="{{ $list->name }}">
+                                                        <img class="avatar-img rounded-circle" src="{{ URL::to('images/'.$list->avatar) }}" alt="{{ $list->full_name }}">
                                                     @else
-                                                        <img class="avatar-img rounded-circle" src="{{ URL::to('images/photo_defaults.jpg') }}" alt="{{ $list->name }}">
+                                                        <img class="avatar-img rounded-circle" src="{{ URL::to('images/photo_defaults.jpg') }}" alt="{{ $list->full_name }}">
                                                     @endif
                                                 </a>
-                                                <a href="teacher-details.html">{{ $list->name }}</a>
+                                                <a href="teacher-details.html">{{ $list->full_name }}</a>
                                             </h2>
                                         </td>
                                         <td>10</td>
                                         <td>{{ $list->gender }}</td>
                                         <td>Mathematics</td>
                                         <td>A</td>
-                                        <td>{{ $list->mobile }}</td>
+                                        <td>{{ $list->phone_number }}</td>
                                         <td>{{ $list->address }}</td>
                                         <td class="text-end">
                                             <div class="actions">
@@ -143,7 +149,7 @@
         <div class="modal-content">
             <div class="modal-body">
                 <div class="form-header">
-                    <h3>Delete Student</h3>
+                    <h3>Delete Teacher</h3>
                     <p>Are you sure want to delete?</p>
                 </div>
                 <div class="modal-btn delete-action">

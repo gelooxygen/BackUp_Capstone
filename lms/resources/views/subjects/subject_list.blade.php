@@ -11,9 +11,15 @@
                     <div class="col">
                         <h3 class="page-title">Subjects</h3>
                         <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('class-subject.unified-management') }}">Class & Subject Management</a></li>
                             <li class="breadcrumb-item active">Subjects</li>
                         </ul>
+                    </div>
+                    <div class="col-auto">
+                        <a href="{{ route('class-subject.unified-management') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Management
+                        </a>
                     </div>
                 </div>
             </div>
@@ -104,9 +110,6 @@
                                                     </a>
                                                     <a class="btn btn-sm bg-danger-light delete" data-bs-toggle="modal" data-bs-target="#delete">
                                                         <i class="fe fe-trash-2"></i>
-                                                    </a>
-                                                    <a href="{{ route('subjects.assignTeachersForm', $value->id ?? $value->subject_id) }}" class="btn btn-sm btn-info">
-                                                        <i class="fas fa-chalkboard-teacher"></i> Assign Teachers
                                                     </a>
                                                 </div>
                                             </td>
